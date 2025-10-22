@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificación Operador Estelar</title>
+    <!-- Carga de Tailwind CSS para el estilo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuración de Estilos Astro-Terminal Glitch -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+        
+        /* Definición de colores Glitch/Terminal */
+        :root {
+            --color-deep-space: #0A0A1A; /* Fondo Azul Oscuro Profundo */
+            --color-neon-green: #39FF14; /* Verde Neón Brillante */
+            --color-neon-blue: #00FFFF;  /* Cían Neón para Títulos */
+            --color-text-primary: #C0C0D0; /* Texto Gris Claro */
+            --color-grid: #1A1A3A;      /* Líneas de Cuadrícula Azul Oscuro */
+            --color-neon-red: #FF4D4D;  /* Rojo de Error/Peligro */
+        }
+
+        /* Glitch Keyframes para el título/icono */
+        @keyframes glitch {
+            0% { text-shadow: 2px 2px var(--color-neon-green), -2px -2px var(--color-neon-blue); transform: translate(0); }
+            10% { text-shadow: 3px 1px var(--color-neon-green), -1px -3px var(--color-neon-blue); transform: translate(-1px, 1px); }
+            20% { text-shadow: -1px 3px var(--color-neon-green), 2px -1px var(--color-neon-blue); transform: translate(-1px, 0); }
+            30% { text-shadow: 1px 1px var(--color-neon-green), -1px 1px var(--color-neon-blue); transform: translate(1px, -1px); }
+            40% { text-shadow: 0 0 var(--color-neon-green), 0 0 var(--color-neon-blue); transform: translate(0); }
+            100% { text-shadow: 0 0 var(--color-neon-green), 0 0 var(--color-neon-blue); transform: translate(0); }
+        }
+        
+        /* Efecto Scanlines Sutil */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(0, 0, 0, 0.1),
+                rgba(0, 0, 0, 0.5) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        /* Estilos base con tema Astro-Terminal */
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--color-deep-space);
+            background-image: linear-gradient(to right, var(--color-grid) 1px, transparent 1px),
+                              linear-gradient(to bottom, var(--color-grid) 1px, transparent 1px);
+            background-size: 25px 25px;
+            color: var(--color-text-primary);
+        }
+        
+        /* Contenedor principal del Módulo */
+        .stellar-container {
+            border: 2px solid var(--color-neon-blue);
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.2), inset 0 0 15px rgba(0, 255, 255, 0.1); 
+            background-color: rgba(0, 0, 0, 0.7); 
+            backdrop-filter: blur(8px);
+            transition: all 0.5s ease-in-out;
+        }
+
+        /* Estilo para el icono del núcleo/sistema */
+        .reactor-core-icon {
+            font-size: 5rem;
+            line-height: 1;
+            color: var(--color-neon-blue); 
+            text-shadow: 0 0 15px var(--color-neon-blue);
+            animation: pulse 2s infinite alternate, glitch 5s infinite;
+        }
+        @keyframes pulse {
+            from { opacity: 0.8; }
+            to { opacity: 1; text-shadow: 0 0 25px var(--color-neon-blue); }
+        }
+        .text-glitch {
+            color: var(--color-neon-blue);
+            text-shadow: 0 0 8px var(--color-neon-blue);
+            animation: glitch 6s infinite;
+        }
+
+        /* Estilo para las tarjetas de pregunta */
+        .question-card {
+            background-color: rgba(0, 0, 0, 0.4); 
+            border-color: rgba(0, 255, 255, 0.3);
+            box-shadow: inset 0 0 5px rgba(0, 255, 255, 0.1);
+        }
+        
+        /* Estilo para los inputs de respuesta */
+        .answer-label {
+            transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+            background-color: var(--color-deep-space); 
+            border: 1px solid var(--color-grid);
+            cursor: pointer;
+            color: var(--color-text-primary);
+        }
+
+        .answer-label:hover {
+            border-color: var(--color-neon-blue);
+            color: var(--color-neon-blue);
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+        }
+
+        /* Estilo para la selección (Interruptor Activado) */
+        input[type="radio"]:checked + .answer-label {
+            background-color: var(--color-neon-green);
+            border-color: var(--color-neon-green);
+            color: var(--color-deep-space); /* Texto oscuro sobre neón */
+            font-weight: bold;
+            box-shadow: 0 0 15px var(--color-neon-green);
+            /* Animación de feedback al seleccionar */
+            transform: scale(1.02); 
+        }
+        
+        /* Estilo de los selects, inputs de usuario y date input */
+        .operator-input {
+            background-color: var(--color-deep-space);
+            border: 1px solid var(--color-grid);
+            color: var(--color-neon-green);
+            transition: all 0.3s;
+            /* Estilo específico para input[type="date"] para hacerlo terminal */
+            appearance: none;
+            padding-right: 2rem !important; /* Espacio para el icono del calendario */
+        }
+        .operator-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--color-neon-blue);
+            border-color: var(--color-neon-blue);
+        }
+        
+        /* Estilo para el resultado perfecto (Reactores Listos) */
+        .perfect-score {
+            border-color: var(--color-neon-green) !important;
+            background-color: rgba(57, 255, 20, 0.15) !important; /* Verde más sutil */
+            color: var(--color-neon-green) !important;
+            box-shadow: 0 0 30px rgba(57, 255, 20, 0.8) !important;
+        }
+        
+        /* Estilo del botón de enviar/submit y siguiente (GREEN) */
+        #submitButton, #nextButton {
+             background-color: var(--color-neon-green); 
+             color: var(--color-deep-space);
+             box-shadow: 0 0 15px rgba(57, 255, 20, 0.7);
+             font-weight: bold;
+        }
+        #submitButton:hover:not(:disabled), #nextButton:hover:not(:disabled) {
+             background-color: #6EFF4F; /* Verde un poco más claro */
+             box-shadow: 0 0 20px var(--color-neon-green);
+        }
+        
+        /* Estilo del botón de ELIMINAR REGISTRO (RED) */
+        .delete-record-btn {
+            background-color: var(--color-neon-red); 
+            color: var(--color-deep-space);
+            box-shadow: 0 0 15px rgba(255, 77, 77, 0.7);
+            font-weight: bold;
+        }
+        .delete-record-btn:hover:not(:disabled) {
+            background-color: #FF7070;
+            box-shadow: 0 0 20px var(--color-neon-red);
+        }
+
+        /* Estilo para botones deshabilitados */
+        #nextButton:disabled, #submitButton:disabled, .delete-record-btn:disabled {
+             background-color: var(--color-grid);
+             color: var(--color-text-primary);
+             box-shadow: none;
+             cursor: not-allowed;
+        }
+
+        /* Estilo del botón de inicio (enlace de navegación) */
+        .home-link-button {
+            background-color: #3f51b5; /* Azul oscuro */
+            color: white;
+            box-shadow: 0 0 10px rgba(63, 81, 181, 0.5);
+        }
+        .home-link-button:hover {
+            background-color: #5c6bc0; /* Azul más claro al pasar el ratón */
+            box-shadow: 0 0 15px rgba(63, 81, 181, 0.7);
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 min-h-screen flex items-start justify-center">
+
+    <!-- Botón de Regresar al Inicio (Enlace a introduccion.html) -->
+    <a href="introduccion.html" 
+       class="home-link-button absolute top-4 left-4 sm:top-8 sm:left-8 py-2 px-4 rounded-full transition duration-300 font-['Space_Mono'] text-sm flex items-center">
+        <span class="mr-2">←</span> Regresar al Inicio
+    </a>
+
+
+    <div class="w-full max-w-xl stellar-container rounded-lg p-6 md:p-10">
+        
+        <!-- Visual de Módulo de Control -->
+        <div class="flex items-center justify-center h-28 mb-8">
+            <!-- Icono de Estrella/Plasma -->
+            <span id="starIcon" class="reactor-core-icon" role="img" aria-label="Core Status Icon">CORE</span>
+        </div>
+
+        <h1 class="text-4xl font-extrabold mb-2 border-b-2 border-neon-blue pb-3 text-center font-['Space_Mono'] text-glitch">
+            PROTOCOLO: GLITCH CERT V2
+        </h1>
+        <p class="text-gray-400 mb-6 text-center text-sm">Validación de Nivel de Operador. Responde las 5 preguntas.</p>
+        
+        <!-- Identificación de Operador (OBLIGATORIA) -->
+        <div class="mb-6 space-y-4 p-4 rounded-xl border-2 border-neon-blue bg-black/40 shadow-inner">
+            <p class="text-sm font-bold text-yellow-300 mb-2">ID DE ACCESO DE OPERADOR: <span class="text-red-500 font-extrabold">(MANDATORIO)</span></p>
+            
+            <div>
+                <label for="operatorName" class="block text-xs font-semibold text-white mb-1">Nombre Completo del Operador:</label>
+                <input type="text" id="operatorName" 
+                       class="w-full p-2 rounded-md operator-input focus:ring-0"
+                       placeholder="Alias de Operador" oninput="updateNavigationButtons()">
+            </div>
+
+            <div class="flex gap-4">
+                <div class="flex-1">
+                    <!-- INICIO DE CAMBIO: Nivel (1-6) -->
+                    <label for="operatorLevel" class="block text-xs font-semibold text-white mb-1">Nivel (1-6):</label>
+                    <select id="operatorLevel" class="w-full p-2 rounded-md operator-input focus:ring-0" onchange="updateNavigationButtons()">
+                        <option value="" disabled selected>Seleccione Nivel</option>
+                        <script>
+                            // Generar opciones de Nivel 1-6
+                            for (let i = 1; i <= 6; i++) {
+                                document.write(`<option value="${i}">${i}</option>`);
+                            }
+                        </script>
+                    </select>
+                    <!-- FIN DE CAMBIO: Nivel (1-6) -->
+                </div>
+                <div class="flex-1">
+                    <label for="operatorModule" class="block text-xs font-semibold text-white mb-1">Módulo (A-O):</label>
+                    <select id="operatorModule" class="w-full p-2 rounded-md operator-input focus:ring-0" onchange="updateNavigationButtons()">
+                        <option value="" disabled selected>Seleccione Módulo</option>
+                        <script>
+                            // Generar opciones de Grupo A-O
+                            for (let i = 0; i <= 14; i++) { // A to O is 15 letters
+                                const letter = String.fromCharCode(65 + i);
+                                document.write(`<option value="${letter}">${letter}</option>`);
+                            }
+                        </script>
+                    </select>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 italic mt-2">La combinación es necesaria para el registro de la certificación.</p>
+        </div>
+
+
+        <!-- Información de Usuario y Estado -->
+        <div id="status-info" class="text-xs p-3 mb-4 rounded-lg bg-neon-blue/10 border border-neon-blue text-neon-blue">
+            <p><strong>Cargando...</strong></p>
+        </div>
+
+        <!-- Contenedor del Quiz (Muestra solo una pregunta a la vez) -->
+        <div id="quiz-container" class="space-y-6 mb-8 min-h-[150px]">
+            <!-- Las preguntas se inyectarán aquí por JavaScript -->
+        </div>
+
+        <!-- Botones de Navegación y Control -->
+        <div id="controls" class="flex justify-between gap-4">
+            <button id="prevButton"
+                    class="flex-1 py-3 px-6 bg-gray-700 text-white font-bold rounded-md hover:bg-gray-600 transition duration-300 shadow-md focus:outline-none disabled:opacity-30 border border-gray-600">
+                ← Anterior
+            </button>
+            <button id="nextButton"
+                    class="flex-1 py-3 px-6 text-black rounded-md transition duration-300 shadow-lg focus:outline-none disabled:opacity-30 font-['Space_Mono']"
+                    disabled>
+                Siguiente →
+            </button>
+            <button id="submitButton"
+                    class="py-3 px-6 text-black rounded-md transition duration-300 shadow-lg focus:outline-none hidden font-['Space_Mono']"
+                    disabled>
+                Cerrar Protocolo
+            </button>
+            <!-- BOTÓN DE REINICIO -->
+            <button id="resetButton"
+                    class="w-full py-3 px-6 bg-gray-700 text-white font-bold rounded-md hover:bg-gray-600 transition duration-300 shadow-lg focus:outline-none hidden font-['Space_Mono']">
+                Reiniciar Prueba (Nuevo Operador)
+            </button>
+        </div>
+
+        <!-- Resultados y Puntaje Persistente -->
+        <div class="mt-8 pt-6 border-t border-neon-blue/50">
+            <h2 class="text-xl font-semibold text-neon-blue mb-4 font-['Space_Mono']">Registro de Certificaciones</h2>
+            
+            <!-- Puntaje del Intento Actual -->
+            <div id="current-result" class="p-4 rounded-md border border-yellow-500 bg-yellow-900/30 mb-4 font-medium text-yellow-300 hidden">
+                <!-- Se llenará con el puntaje actual -->
+            </div>
+
+            <!-- Mejor Puntaje Persistente -->
+            <div id="bestScoreOutput" class="p-4 rounded-md border border-neon-blue/30 bg-black/40 text-white shadow-inner mb-4">
+                <strong>Mejor Certificación Registrada:</strong> <span>Cargando...</span>
+            </div>
+
+            <!-- Panel de Administración de Récords (Eliminación) -->
+            <div class="p-4 rounded-md border border-red-500/50 bg-red-900/20 shadow-inner">
+                <h3 class="text-lg font-bold text-red-400 mb-2">Terminal de Administración (PELIGRO)</h3>
+                
+                <!-- Panel de Confirmación de Eliminación (oculto por defecto) -->
+                <div id="deletePanel" class="mt-4 p-3 border-t border-red-500/50 hidden space-y-3">
+                    <p class="text-sm text-red-300">¡Advertencia! Para borrar el mejor récord, introduce el código de fecha de protocolo secreto.</p>
+                    
+                    <div>
+                        <!-- INICIO DE CAMBIO: Ocultar la fecha de contraseña -->
+                        <label for="deletePasswordDate" class="block text-xs font-semibold text-red-300 mb-1">Código de Fecha:</label>
+                        <!-- FIN DE CAMBIO: Ocultar la fecha de contraseña -->
+                        <input type="date" id="deletePasswordDate" 
+                               class="w-full p-2 rounded-md operator-input border-red-500/50 focus:ring-0 focus:border-red-500"
+                               placeholder="YYYY-MM-DD">
+                    </div>
+
+                    <button id="confirmDeleteBtn" 
+                            class="w-full py-2 px-4 rounded-md delete-record-btn transition duration-300 text-sm disabled:opacity-50">
+                        Confirmar Eliminación de Récord
+                    </button>
+                    <!-- Agregamos un botón para ocultar el panel si se abrió por error -->
+                    <button id="hideDeletePanelBtn" 
+                            class="w-full py-1 px-4 mt-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition duration-300 text-xs">
+                        Cancelar/Ocultar
+                    </button>
+                </div>
+
+                <!-- Instrucción visible mientras el panel está oculto -->
+                <p id="adminInstruction" class="text-xs text-red-400 italic">Haz clic en el ID del Operador de Récord para activar la terminal de borrado.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts de Lógica del Juego y Local Storage -->
+    <script type="module">
+        
+        // --- Constantes y Variables Globales ---
+        let currentQuestionIndex = 0;
+        let userAnswers = {}; // { q_id: 'selected_option_value' }
+        // FECHA ACTUALIZADA: 28 de septiembre del 2025
+        const DELETE_PASSWORD_DATE = '2025-09-28'; 
+        
+        // Referencias del DOM
+        const quizContainer = document.getElementById('quiz-container');
+        const submitButton = document.getElementById('submitButton');
+        const nextButton = document.getElementById('nextButton');
+        const prevButton = document.getElementById('prevButton');
+        const resetButton = document.getElementById('resetButton');
+        const statusInfo = document.getElementById('status-info');
+        const bestScoreOutput = document.getElementById('bestScoreOutput');
+        const currentResultOutput = document.getElementById('current-result');
+        const starIcon = document.getElementById('starIcon');
+        
+        // Elementos de Administración
+        const deletePanel = document.getElementById('deletePanel');
+        const hideDeletePanelBtn = document.getElementById('hideDeletePanelBtn');
+        const deletePasswordDateInput = document.getElementById('deletePasswordDate');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const adminInstruction = document.getElementById('adminInstruction');
+
+
+        // Identificadores de Operador
+        const operatorNameInput = document.getElementById('operatorName');
+        const operatorLevelSelect = document.getElementById('operatorLevel');
+        const operatorModuleSelect = document.getElementById('operatorModule');
+
+
+        // Definición del Quiz con preguntas de astronomía (5 preguntas)
+        const QUIZ_DATA = [
+            { 
+                id: 1, 
+                question: "El sol, ¿de qué color es?", 
+                answer: "Blanco",
+                options: ["Amarillo", "Blanco", "Rojo", "Naranja"]
+            },
+            { 
+                id: 2, 
+                question: "¿Qué temperatura alcanza el sol en su núcleo (Heat)?", 
+                answer: "15 MK",
+                options: ["15 MK", "25 MK", "50 MK", "100 MK"]
+            },
+            { 
+                id: 3, 
+                question: "¿Qué temperatura del Plasma se alcanza para que sea una reacción de fusión 'grave'?", 
+                answer: "154.35 Millones °C",
+                options: ["10 Millones °C", "75 Millones °C", "154.35 Millones °C", "1000 Millones °C"]
+            },
+            {
+                id: 4,
+                question: "¿Cuál es el planeta más grande de nuestro Sistema Solar?",
+                answer: "Júpiter",
+                options: ["Saturno", "Urano", "Júpiter", "Neptuno"]
+            },
+            {
+                id: 5, 
+                question: "¿A qué distancia aproximada se encuentra la Vía Láctea de la Galaxia de Andrómeda?",
+                answer: "2.5 millones de años luz",
+                options: ["100,000 años luz", "1 millón de años luz", "2.5 millones de años luz", "10 millones de años luz"]
+            }
+        ];
+        
+        const TOTAL_QUESTIONS = QUIZ_DATA.length; // Es 5
+        const BEST_SCORE_KEY = 'quiz_operator_best_score_v3'; // Clave para Local Storage
+
+        // --- Funciones de Utilidad y Lógica de Récords ---
+
+        /**
+         * Muestra mensajes de estado en la UI.
+         * @param {string} message El mensaje a mostrar.
+         * @param {string} type Tipo de mensaje ('info', 'error', 'success', 'warning').
+         */
+        function updateStatus(message, type = 'info') {
+            let classes = 'text-xs p-3 mb-4 rounded-lg ';
+            let icon = 'ⓘ';
+            if (type === 'error') {
+                // Estilo para ERROR (Rojo Neón)
+                classes += 'bg-red-900/20 border border-red-500 text-red-400 shadow-md';
+                icon = '❌';
+            } else if (type === 'success') {
+                // Estilo para SUCCESS (Verde Neón)
+                classes += 'bg-neon-green/10 border border-neon-green text-neon-green shadow-md';
+                icon = '✅';
+            } else if (type === 'warning') {
+                // Estilo para WARNING (Amarillo)
+                 classes += 'bg-yellow-900/20 border border-yellow-500 text-yellow-400 shadow-md';
+                 icon = '⚠️';
+            } else {
+                // Estilo para INFO (Cian Neón)
+                classes += 'bg-neon-blue/10 border border-neon-blue text-neon-blue shadow-md';
+            }
+
+            statusInfo.className = classes;
+            statusInfo.innerHTML = `
+                <p><strong>Estado del Módulo:</strong> ${icon} ${message}</p>
+                <p><strong>Persistencia de Récords:</strong> Local Storage / ${TOTAL_QUESTIONS} Preguntas</p>
+            `;
+        }
+
+        /**
+         * Valida que los datos del operador estén completos (OBLIGATORIO).
+         * @returns {boolean} True si todos los campos están llenos.
+         */
+        function validateOperatorData() {
+            const name = operatorNameInput.value.trim();
+            const level = operatorLevelSelect.value;
+            const module = operatorModuleSelect.value;
+            
+            return name && level && module;
+        }
+
+        /**
+         * Renderiza la pregunta actual en la interfaz.
+         */
+        function renderCurrentQuestion() {
+            const q = QUIZ_DATA[currentQuestionIndex];
+            
+            // Ocultar resultados anteriores
+            currentResultOutput.classList.add('hidden');
+
+            quizContainer.innerHTML = `
+                <div id="q-card-${q.id}" class="question-card p-6 rounded-md shadow-lg border">
+                    <p class="text-xl font-bold mb-4 text-neon-green">${currentQuestionIndex + 1}/${TOTAL_QUESTIONS}. ${q.question}</p>
+                    <div class="space-y-3">
+                        ${q.options.map((option, idx) => {
+                            const uniqueId = `q${q.id}-opt${idx}`;
+                            // Usar el ID secuencial del array (currentQuestionIndex + 1) para userAnswers
+                            const isChecked = userAnswers[currentQuestionIndex + 1] === option; 
+                            return `
+                                <div class="flex items-center">
+                                    <input type="radio" id="${uniqueId}" name="question-${q.id}" value="${option}" 
+                                           class="hidden" ${isChecked ? 'checked' : ''} 
+                                           data-q-idx="${currentQuestionIndex + 1}" onchange="handleAnswerChange(this)">
+                                    <label for="${uniqueId}" class="answer-label w-full p-3 rounded-md block text-sm">
+                                        ${option}
+                                    </label>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            
+            // Actualizar botones de navegación
+            updateNavigationButtons();
+        }
+
+        /**
+         * Maneja el cambio de respuesta de la pregunta actual y actualiza el estado de los botones.
+         */
+        window.handleAnswerChange = function(input) {
+            // Utilizamos el índice secuencial + 1 para guardar la respuesta
+            const qIdx = parseInt(input.getAttribute('data-q-idx')); 
+            userAnswers[qIdx] = input.value;
+            
+            updateNavigationButtons();
+        }
+        
+        /**
+         * Actualiza el estado de los botones (Anterior, Siguiente, Finalizar) y la validación de datos.
+         */
+        function updateNavigationButtons() {
+            // Botón Reiniciar siempre oculto durante la prueba
+            resetButton.classList.add('hidden');
+
+            // 1. Validar los datos del operador (OBLIGATORIO)
+            const isDataValid = validateOperatorData(); 
+            
+            if (!isDataValid) {
+                // Si la data no es válida, se deshabilita avanzar y se muestra el error.
+                nextButton.disabled = true;
+                submitButton.disabled = true;
+                updateStatus('ERROR: ID de Operador Incompleto. Rellena todos los campos antes de continuar.', 'error');
+                prevButton.disabled = currentQuestionIndex === 0; // Anterior sigue funcionando
+                return; 
+            }
+            
+            // Si la data es válida, restablecemos el mensaje de estado normal.
+            updateStatus('Módulo de prueba activo. Responde la pregunta.', 'info');
+
+            // 2. Lógica de navegación normal
+            prevButton.disabled = currentQuestionIndex === 0;
+            const isAnswerSelected = userAnswers.hasOwnProperty(currentQuestionIndex + 1);
+
+            if (currentQuestionIndex < TOTAL_QUESTIONS - 1) {
+                // Preguntas intermedias
+                nextButton.classList.remove('hidden');
+                submitButton.classList.add('hidden');
+                
+                // Deshabilitar "Siguiente" si la respuesta no está seleccionada
+                nextButton.disabled = !isAnswerSelected; 
+                
+            } else {
+                // Última pregunta
+                nextButton.classList.add('hidden');
+                submitButton.classList.remove('hidden');
+                
+                // Deshabilitar "Finalizar" si la respuesta no está seleccionada
+                submitButton.disabled = !isAnswerSelected; 
+            }
+        }
+        
+        /**
+         * Navega a la pregunta siguiente.
+         */
+        function nextQuestion() {
+            if (currentQuestionIndex < TOTAL_QUESTIONS - 1) {
+                currentQuestionIndex++;
+                renderCurrentQuestion();
+            }
+        }
+        
+        /**
+         * Navega a la pregunta anterior.
+         */
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderCurrentQuestion();
+            }
+        }
+
+        /**
+         * Restablece el estado del quiz para un nuevo operador. (Mantiene la función para el botón Reiniciar)
+         */
+        window.resetQuiz = function() {
+            currentQuestionIndex = 0;
+            userAnswers = {}; // Borrar todas las respuestas
+            
+            currentResultOutput.classList.add('hidden'); // Ocultar resultados
+            
+            // Ocultar el botón de reinicio y mostrar los de navegación
+            resetButton.classList.add('hidden'); 
+            prevButton.classList.remove('hidden');
+            nextButton.classList.remove('hidden');
+            
+            // Borrar los datos del operador
+            operatorNameInput.value = ''; 
+            operatorLevelSelect.value = '';
+            operatorModuleSelect.value = '';
+            
+            // Ocultar el panel de eliminación y restablecer mensajes
+            deletePanel.classList.add('hidden');
+            adminInstruction.classList.remove('hidden');
+            
+            // Restaurar el icono a estado neutral
+            starIcon.style.color = 'var(--color-neon-blue)';
+            starIcon.innerHTML = 'CORE';
+
+            renderCurrentQuestion(); // Empezar de nuevo en Q1
+            
+            // Forzar la validación de datos para deshabilitar botones
+            updateNavigationButtons(); 
+        }
+
+        /**
+         * Calcula el puntaje y muestra los resultados.
+         */
+        function checkAnswers() {
+            // Re-validación final antes de procesar
+            if (!validateOperatorData()) {
+                updateStatus('ERROR CRÍTICO: ID de Operador Incompleto. No se puede cerrar el protocolo sin la identificación completa.', 'error');
+                return; 
+            }
+
+            let score = 0;
+            const total = TOTAL_QUESTIONS;
+            
+            // Obtener datos del Operador
+            const operatorName = operatorNameInput.value.trim() || 'Operador Desconocido';
+            const operatorLevel = operatorLevelSelect.value || 'N/A';
+            const operatorModule = operatorModuleSelect.value || 'N/A';
+            const operatorId = `${operatorName} (Nivel: ${operatorLevel}, Módulo: ${operatorModule})`;
+
+            // 1. Calcular el puntaje
+            QUIZ_DATA.forEach((q, index) => {
+                const userAnswer = userAnswers[index + 1] || ''; 
+                
+                const normalize = (text) => text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                
+                const correctNormalized = normalize(q.answer);
+                const userNormalized = normalize(userAnswer);
+
+                if (userNormalized === correctNormalized) {
+                    score++;
+                }
+            });
+            
+            // 2. Mostrar el resultado actual
+            currentResultOutput.innerHTML = `
+                <p><strong>INFORME DE CERTIFICACIÓN:</strong></p>
+                <p>ID de Operador: <span class="font-semibold">${operatorId}</span></p>
+                <p>Respuestas Correctas: <span class="text-xl font-extrabold">${score} de ${total}</span>.</p>
+                <p class="text-xs mt-2 italic">Protocolo cerrado. Pulse Reiniciar para el siguiente operador.</p>
+            `;
+            currentResultOutput.classList.remove('hidden');
+
+            // 3. Aplicar clases de estilo y actualizar icono
+            currentResultOutput.classList.remove('perfect-score', 'bg-yellow-900/30', 'border-yellow-500', 'text-yellow-300', 'bg-red-900/30', 'border-red-500', 'text-red-300');
+            
+            if (score === total) {
+                currentResultOutput.classList.add('perfect-score');
+                starIcon.style.color = 'var(--color-neon-green)'; 
+                starIcon.innerHTML = 'ONLINE';
+            } else if (score >= total / 2) {
+                 currentResultOutput.classList.add('bg-yellow-900/30', 'border-yellow-500', 'text-yellow-300');
+                 starIcon.style.color = '#FFD700'; 
+                 starIcon.innerHTML = 'WARN';
+            } else {
+                currentResultOutput.classList.add('bg-red-900/30', 'border-red-500', 'text-red-300');
+                starIcon.style.color = '#FF4D4D'; 
+                starIcon.innerHTML = 'FAIL';
+            }
+
+            // 4. Guardar el récord localmente (si es un nuevo récord)
+            saveScore(score, operatorId);
+            
+            // 5. Bloquear la interfaz y mostrar Reiniciar
+            submitButton.classList.add('hidden');
+            nextButton.classList.add('hidden');
+            prevButton.classList.add('hidden');
+            
+            resetButton.classList.remove('hidden'); // Mostrar el botón de reinicio
+            
+            quizContainer.innerHTML = `<p class="text-center py-10 text-2xl font-bold text-neon-green font-['Space_Mono']">PROTOCOLO CERRADO. INFORME GENERADO.</p>`;
+        }
+
+        /**
+         * Guarda el puntaje actual en Local Storage y verifica si es el mejor puntaje.
+         */
+        function saveScore(currentScore, operatorId) {
+            
+            const storedData = localStorage.getItem(BEST_SCORE_KEY);
+            const existingData = storedData ? JSON.parse(storedData) : { score: 0, operatorId: 'N/A', timestamp: null };
+            const bestScore = existingData.score;
+            
+            let newBestScore = bestScore;
+            let newOperatorId = existingData.operatorId;
+            let message = `Informe de certificación registrado.`;
+            
+            if (currentScore > bestScore) {
+                newBestScore = currentScore;
+                newOperatorId = operatorId; 
+                message = `¡RÉCORD ACTIVADO! Nueva certificación más alta por ${newOperatorId}.`;
+            }
+
+            const dataToStore = {
+                score: newBestScore,
+                operatorId: newOperatorId,
+                timestamp: new Date().toISOString()
+            };
+
+            localStorage.setItem(BEST_SCORE_KEY, JSON.stringify(dataToStore));
+            
+            updateStatus(message, 'success');
+
+            loadBestScoreFromLocal(); 
+        }
+        
+        /**
+         * Carga el mejor puntaje (récord) y el nombre del operador desde Local Storage.
+         */
+        function loadBestScoreFromLocal() {
+            const storedData = localStorage.getItem(BEST_SCORE_KEY);
+
+            // Asegurarse de que el panel de borrado y el mensaje estén en su estado inicial (oculto/visible)
+            deletePanel.classList.add('hidden');
+            adminInstruction.classList.remove('hidden');
+
+
+            if (storedData) {
+                const data = JSON.parse(storedData);
+                const bestScore = data.score || 0;
+                const bestOperatorId = data.operatorId || 'Operador Desconocido';
+                const timestamp = data.timestamp ? new Date(data.timestamp).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
+                
+                // MODIFICADO: El ID del operador ahora es una etiqueta <span> clickeable
+                bestScoreOutput.innerHTML = `
+                    <strong>Mejor Certificación Registrada:</strong> ${bestScore} de ${TOTAL_QUESTIONS} por 
+                    <span id="bestOperatorIdDisplay" 
+                          class="font-bold text-neon-green cursor-pointer underline hover:text-white transition duration-200" 
+                          title="Haz clic para activar la Terminal de Borrado.">${bestOperatorId}</span>.
+                    <span class="block text-xs text-gray-500 mt-1">Fecha de Registro: ${timestamp}</span>
+                `;
+                
+                // Actualiza el icono según el mejor récord
+                if (bestScore === TOTAL_QUESTIONS) {
+                    starIcon.style.color = 'var(--color-neon-green)';
+                    starIcon.innerHTML = 'ONLINE';
+                } else if (bestScore >= TOTAL_QUESTIONS / 2) {
+                     starIcon.style.color = '#FFD700';
+                     starIcon.innerHTML = 'WARN';
+                } else {
+                    starIcon.style.color = 'var(--color-neon-blue)';
+                    starIcon.innerHTML = 'CORE';
+                }
+
+            } else {
+                bestScoreOutput.innerHTML = `
+                    <strong>Mejor Certificación Registrada:</strong> 0 de ${TOTAL_QUESTIONS}.
+                    <span class="block text-xs text-gray-500 mt-1">Sin certificaciones registradas.</span>
+                `;
+                starIcon.style.color = 'var(--color-neon-blue)';
+                starIcon.innerHTML = 'CORE';
+                
+                // Ocultar instrucción si no hay récord para no dar pie a la eliminación
+                adminInstruction.classList.add('hidden'); 
+            }
+            updateStatus('Sistema en línea. Esperando ID de Operador.', 'info');
+        }
+        
+        // --- Lógica de Eliminación de Récord ---
+
+        // Listener para activar el panel de eliminación al hacer clic en el ID del operador.
+        bestScoreOutput.addEventListener('click', (event) => {
+            const target = event.target.closest('#bestOperatorIdDisplay');
+            
+            if (target) {
+                // Si se hace clic en el ID, mostramos el panel de eliminación y ocultamos la instrucción
+                deletePanel.classList.remove('hidden');
+                adminInstruction.classList.add('hidden');
+                deletePasswordDateInput.focus();
+                event.preventDefault(); 
+            }
+        });
+
+        // Listener para ocultar el panel
+        hideDeletePanelBtn.addEventListener('click', () => {
+            deletePanel.classList.add('hidden');
+            // Solo mostramos la instrucción si hay un récord para borrar
+            const storedData = localStorage.getItem(BEST_SCORE_KEY);
+            if (storedData) {
+                 adminInstruction.classList.remove('hidden');
+            }
+           
+        });
+
+
+        // Habilitar/Deshabilitar el botón de Confirmar Eliminación
+        deletePasswordDateInput.addEventListener('input', () => {
+            // Se habilita si hay algo en el campo de fecha
+            confirmDeleteBtn.disabled = !deletePasswordDateInput.value;
+        });
+
+        // Procesar la eliminación del récord
+        confirmDeleteBtn.addEventListener('click', () => {
+            const enteredDate = deletePasswordDateInput.value;
+
+            if (enteredDate === DELETE_PASSWORD_DATE) {
+                // Contraseña Correcta: Eliminar
+                localStorage.removeItem(BEST_SCORE_KEY);
+                
+                // Limpiar input y ocultar panel
+                deletePasswordDateInput.value = '';
+                deletePanel.classList.add('hidden');
+                confirmDeleteBtn.disabled = true;
+
+                loadBestScoreFromLocal(); // Recargar el estado, que ahora mostrará 0
+                updateStatus('ACCESO APROBADO: El mejor registro de certificación ha sido ELIMINADO del sistema.', 'warning');
+            } else {
+                // Contraseña Incorrecta: Error
+                updateStatus('ACCESO DENEGADO: Código de fecha incorrecto. Fallo en la autenticación de borrado.', 'error');
+                deletePasswordDateInput.value = ''; // Limpiar el campo
+                confirmDeleteBtn.disabled = true;
+                deletePasswordDateInput.focus();
+            }
+        });
+
+
+        // --- Inicialización y Listeners de Eventos ---
+
+        /**
+         * Inicializa el juego y carga los datos locales.
+         */
+        function initializeGame() {
+            renderCurrentQuestion(); // Renderiza la primera pregunta
+            loadBestScoreFromLocal();
+            // Forzar la validación para deshabilitar botones al inicio si los campos están vacíos
+            updateNavigationButtons(); 
+        }
+
+        window.onload = initializeGame;
+        submitButton.addEventListener('click', checkAnswers);
+        nextButton.addEventListener('click', nextQuestion);
+        prevButton.addEventListener('click', prevQuestion);
+        resetButton.addEventListener('click', resetQuiz);
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosotros Somos - Equipo de Fusión Estelar</title>
+
+    <!-- Carga de Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Configuración de Tailwind (Asegurando la coherencia de colores) --><script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'fusion-dark': '#010409', 
+                        'plasma-neon': '#00F0FF', // Cyan
+                        'sun-core': '#ff9900',   
+                        'green-accel': '#10b981', // Verde
+                        'team-accent': '#7c3aed', // Púrpura principal
+                        'purple-light': '#9333ea', // Púrpura más claro para animaciones
+                        'blue-light': '#3b82f6', // Azul claro para animaciones
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #010409; 
+            color: white;
+            font-family: 'Inter', sans-serif;
+            position: relative; 
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* 1. Fondo de Estrellas y Nebulosa */
+        .starry-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(255,255,255,0.8) 1px, transparent 1px),
+                radial-gradient(circle at 90% 80%, rgba(255,255,255,0.6) 1px, transparent 1px),
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4) 0.5px, transparent 0.5px),
+                radial-gradient(ellipse at 80% 0%, rgba(124,58,237,0.2) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 100%, rgba(0,240,255,0.15) 0%, transparent 50%),
+                #010409;
+            background-size: 100% 100%;
+        }
+
+        /* 2. Animación de Resplandor Neón para el Título Principal */
+        @keyframes neon-header-glow {
+            from { text-shadow: 0 0 10px #7c3aed, 0 0 20px #7c3aed; }
+            to { text-shadow: 0 0 15px #7c3aed, 0 0 35px #7c3aed, 0 0 50px rgba(124,58,237, 0.7); }
+        }
+        .animated-header {
+            animation: neon-header-glow 2s ease-in-out infinite alternate;
+        }
+
+        /* 3. Estilo de Tarjeta de Miembro (Base para animaciones complejas) */
+        .member-card {
+            background-color: rgba(30, 41, 59, 0.8); /* slate-800 con transparencia */
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(124, 58, 237, 0.5); /* Borde sutil por defecto */
+            position: relative; 
+            overflow: hidden; 
+            z-index: 0; 
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease; /* Transición para hover base */
+            display: flex; /* Para flex-col h-full */
+            flex-direction: column; /* Para flex-col h-full */
+            height: 100%; /* Asegura que todas las tarjetas tengan altura uniforme */
+        }
+        .member-card:hover {
+            transform: translateY(-8px); /* Elevación sutil al pasar el mouse */
+        }
+
+        /* 4. Resplandor motivacional final (Mejorado) */
+        @keyframes motivation-pulse-color {
+            0% { text-shadow: 0 0 8px #00F0FF, 0 0 16px #00F0FF; color: #00F0FF; }
+            25% { text-shadow: 0 0 10px #3b82f6, 0 0 20px #3b82f6; color: #3b82f6; } /* Azul sutil */
+            50% { text-shadow: 0 0 12px #00F0FF, 0 0 25px #00F0FF, 0 0 40px rgba(0,240,255,0.7); color: #00F0FF; }
+            75% { text-shadow: 0 0 10px #10b981, 0 0 20px #10b981; color: #10b981; } /* Verde sutil */
+            100% { text-shadow: 0 0 8px #00F0FF, 0 0 16px #00F0FF; color: #00F0FF; }
+        }
+        .motivational-phrase {
+            animation: motivation-pulse-color 6s ease-in-out infinite;
+        }
+
+        /* 5. Estilo para el botón de regreso (MEJORADO - Eliminada la posición fija) */
+        .back-button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem; /* Menos redondeado, look de chip */
+            background-color: rgba(30, 41, 59, 0.9); /* Fondo oscuro semitransparente */
+            border: 2px solid #00F0FF; /* Borde de plasma neon */
+            color: #00F0FF;
+            font-weight: 600; /* Semibold */
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+            text-decoration: none;
+            z-index: 50; 
+            text-transform: uppercase;
+            font-size: 0.875rem; /* text-sm */
+        }
+        .back-button:hover {
+            background-color: rgba(0, 240, 255, 0.15); /* Fondo neón ligero en hover */
+            color: white; /* Texto blanco en hover */
+            transform: scale(1.05); 
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.7);
+        }
+
+        /* ANIMACIONES Y ESTILOS ESPECÍFICOS DE CADA TARJETA */
+
+        /* A. Dr. Aurora Caelum (Rastro de Energía Púrpura) */
+        @keyframes purple-energy-trail {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .aurora-card {
+            border-color: #7c3aed;
+        }
+        .aurora-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.5), transparent);
+            background-size: 200% 100%; /* Permite que el degradado se desplace */
+            animation: purple-energy-trail 8s linear infinite;
+            opacity: 0.7;
+            z-index: -1;
+        }
+
+        /* B. Ing. Leo Magnetar (Red de Circuitos Activos - Plasma Neon) */
+        @keyframes circuit-flow {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 50px; }
+        }
+        @keyframes containment-pulse { /* Pulso para la imagen de Ramón */
+            0%, 100% { box-shadow: 0 0 10px 5px rgba(0, 240, 255, 0.4), 0 0 0 0 rgba(0, 240, 255, 0.2); }
+            50% { box-shadow: 0 0 20px 10px rgba(0, 240, 255, 0.7), 0 0 0 15px rgba(0, 240, 255, 0); }
+        }
+        .leo-card {
+            border-color: #00F0FF; /* Borde principal de plasma neon */
+            transform: translateY(-15px); /* Un poco más elevado por ser el foco */
+            box-shadow: 0 15px 30px rgba(0, 240, 255, 0.6); /* Sombra inicial fuerte */
+        }
+        .leo-card:hover {
+            transform: translateY(-20px) scale(1.02); /* Mayor elevación y escala en hover */
+            box-shadow: 0 25px 50px rgba(0, 240, 255, 0.8);
+        }
+        .leo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(45deg, #00F0FF40 0, #00F0FF40 1px, transparent 1px, transparent 10px),
+                repeating-linear-gradient(-45deg, #00F0FF40 0, #00F0FF40 1px, transparent 1px, transparent 10px);
+            background-size: 20px 20px;
+            animation: circuit-flow 10s linear infinite;
+            opacity: 0.5;
+            z-index: -1;
+        }
+        .leo-card .profile-image { /* La imagen dentro de la tarjeta Leo */
+            border: 5px solid #00F0FF; /* Borde más grueso y neón */
+            animation: containment-pulse 4s ease-in-out infinite alternate;
+        }
+
+        /* C. Dra. Kira Stellar (Onda Cósmica Azul) */
+        @keyframes cosmic-wave {
+            0% { transform: translate(-100%, -100%); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.6; }
+            100% { transform: translate(100%, 100%); opacity: 0; }
+        }
+        .kira-card {
+            border-color: #3b82f6;
+        }
+        .kira-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100px; /* Tamaño de la onda */
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.7), transparent);
+            animation: cosmic-wave 12s ease-in-out infinite;
+            z-index: -1;
+        }
+
+    </style>
+</head>
+<body class="py-16 px-4">
+
+    <!-- Capa de fondo con efecto de estrellas/nebulosa --><div class="starry-background"></div>
+
+    <!-- El botón fijo ha sido removido de aquí y movido al final del main -->
+
+    <main class="max-w-7xl mx-auto z-10 relative">
+        
+        <!-- Header --><header class="text-center mb-16 pt-10">
+            <h1 class="text-7xl font-black text-team-accent tracking-widest animated-header uppercase">
+                // Núcleo de Misión //
+            </h1>
+            <p class="text-3xl text-slate-300 mt-4 font-light italic">
+                La Danza Cósmica de la Energía: Del Sol a la Tierra
+            </p>
+        </header>
+
+        <!-- Sección Nosotros Somos --><section class="mb-20">
+            <h2 class="text-4xl font-bold text-plasma-neon mb-10 border-b-2 border-plasma-neon/50 pb-2 text-center">
+                NOSOTROS SOMOS
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 items-stretch"> <!-- Usamos items-stretch para alturas uniformes --><!-- Miembro 1: Dr. Aurora Caelum --><div class="member-card p-6 rounded-2xl aurora-card"> 
+                    <div class="text-center relative z-10 flex-grow">
+                        <img 
+                            class="w-24 h-24 mx-auto rounded-full object-cover border-4 border-team-accent mb-4 profile-image" 
+                            src="https://placehold.co/100x100/7c3aed/ffffff?text=AC" 
+                            alt="Foto de perfil de Dr. Aurora Caelum"
+                            onerror="this.onerror=null; this.src='https://placehold.co/100x100/7c3aed/ffffff?text=AC'" 
+                        />
+                        <h3 class="text-3xl font-extrabold text-white mb-1">
+                            Dr. Aurora Caelum
+                        </h3>
+                        <p class="text-lg font-medium text-team-accent mb-4">
+                            Visionaria de Fusión
+                        </p>
+                    </div>
+                    <p class="text-slate-300 text-base leading-relaxed relative z-10">
+                        Lidera la misión de replicar la energía solar en la Tierra, fusionando la ciencia de vanguardia con la visión de la sostenibilidad energética global. Su enfoque es la ignición permanente.
+                    </p>
+                </div>
+
+                <!-- Miembro 2: Ing. Leo Magnetar (Con imagen de Ramón) --><div class="member-card p-6 rounded-2xl leo-card">
+                    <div class="text-center relative z-10 flex-grow">
+                        <img 
+                            class="w-32 h-32 sm:w-40 sm:h-40 mx-auto rounded-full object-cover mb-4 profile-image" 
+                            src="imagenes/Ramon.jpg" 
+                            alt="Foto de perfil de Ing. Leo Magnetar (Ramón)"
+                        />
+                        <h3 class="text-3xl font-extrabold text-white mb-1">
+                            Est. Cruz Mazon
+                        </h3>
+                        <p class="text-lg font-medium text-plasma-neon mb-4">
+                            Mini Programador 
+                        </p>
+                    </div>
+                    <p class="text-slate-300 text-base leading-relaxed relative z-10">
+                        Hola, soy Cruz Mazon. Estoy en el viaje del aprendizaje, buscando activamente mejorar y crecer. Creo firmemente que apoyar a otros es la mejor forma de avanzar. ¡Un placer conectar con una gran equipo como los que estamos aqui!
+                    </p>
+                </div>
+
+                <!-- Miembro 3: Dra. Kira Stellar --><div class="member-card p-6 rounded-2xl kira-card">
+                    <div class="text-center relative z-10 flex-grow">
+                        <img 
+                            class="w-24 h-24 mx-auto rounded-full object-cover border-4 border-green-accel mb-4 profile-image" 
+                            src="https://placehold.co/100x100/10b981/010409?text=KS" 
+                            alt="Foto de perfil de Dra. Kira Stellar"
+                            onerror="this.onerror=null; this.src='https://placehold.co/100x100/10b981/010409?text=KS'" 
+                        />
+                        <h3 class="text-3xl font-extrabold text-white mb-1">
+                            Dra. Kira Stellar
+                        </h3>
+                        <p class="text-lg font-medium text-green-accel mb-4">
+                            Analista de Impacto Planetario
+                        </p>
+                    </div>
+                    <p class="text-slate-300 text-base leading-relaxed relative z-10">
+                        Se enfoca en el estudio del impacto social y ambiental de la fusión nuclear. Su trabajo asegura que la transición energética sea ética, accesible y maximice el beneficio para nuestro planeta.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Frase Motivacional Final (El Big Bang de Inspiración) --><section class="text-center mt-20 mb-10">
+            <h4 class="text-4xl sm:text-5xl font-extrabold tracking-tight motivational-phrase">
+                "El universo te dio el poder de crear estrellas: <br> ¡Enciende tu propia ignición!"
+            </h4>
+        </section>
+
+        <!-- Botón de Regreso al final (Centrado y con margen) -->
+        <a href="introduccion.html" class="back-button flex items-center mx-auto w-fit mt-12 mb-10">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Regresar a Introducción
+        </a>
+
+    </main>
+</body>
+</html>

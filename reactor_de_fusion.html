@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reactor de Fusión</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configuración de fuente y modo oscuro -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'fusion-blue': '#00BFFF',
+                        'plasma-cyan': '#00FFFF',
+                        'dark-bg': '#0A122A',
+                        'panel-bg': '#14203F',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Definición de la animación de rotación del anillo de contención */
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Definición de la animación de pulso del plasma central */
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3), 0 0 30px rgba(0, 255, 255, 0.1);
+                opacity: 0.9;
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 20px #00FFFF, 0 0 40px #00FFFF, 0 0 60px rgba(0, 255, 255, 0.7);
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            100% {
+                box-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3), 0 0 30px rgba(0, 255, 255, 0.1);
+                opacity: 0.9;
+                transform: scale(1);
+            }
+        }
+
+        /* Estilos específicos para el contenedor principal del reactor */
+        .fusion-core-container {
+            border: 2px solid #00BFFF; /* Borde primario azul */
+            /* Efecto de borde que simula energía contenida */
+            box-shadow: 0 0 30px rgba(0, 191, 255, 0.6);
+            /* Fondo ligeramente más oscuro que el cuerpo */
+            background-color: #14203F;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Estilo para el núcleo de plasma (el punto central brillante) */
+        .plasma-core {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #00FFFF 0%, #00BFFF 70%, transparent 100%);
+            border-radius: 50%;
+            animation: pulse-glow 3s infinite ease-in-out;
+            z-index: 10;
+        }
+
+        /* Estilo para el anillo de contención que gira */
+        .containment-ring {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border: 4px solid rgba(0, 191, 255, 0.2);
+            border-top: 4px solid #00BFFF; /* El borde superior es el que se verá más fuerte */
+            border-radius: 50%;
+            animation: rotate 10s linear infinite;
+        }
+
+        /* Clase para ocultar el plasma cuando el reactor está apagado */
+        .hidden-plasma {
+            width: 0px;
+            height: 0px;
+            background: none;
+            box-shadow: none;
+            opacity: 0;
+            transition: all 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-dark-bg min-h-screen flex items-center justify-center p-4 font-sans text-gray-100">
+    
+    <!-- Encabezado de Navegación (Más Llamativo) -->
+    <div class="absolute top-0 left-0 w-full p-4 bg-dark-bg/80 backdrop-blur-sm border-b border-fusion-blue/20 z-20 flex justify-start">
+        <a href="introduccion.html" class="px-4 py-2 rounded-full font-bold text-sm transition duration-300 ease-in-out flex items-center 
+                bg-fusion-blue/20 text-plasma-cyan shadow-lg shadow-fusion-blue/50 
+                hover:bg-fusion-blue hover:text-dark-bg hover:shadow-plasma-cyan/80">
+            <!-- Icono de flecha izquierda de Heroicons -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 mr-2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            </svg>
+            REGRESAR A PRINCIPIO
+        </a>
+    </div>
+
+    <!-- EL DIV DEL REACTOR DE FUSIÓN (fusion-reactor-div) -->
+    <div id="fusion-reactor-div"
+        class="fusion-core-container w-full max-w-4xl rounded-2xl p-6 md:p-10 flex flex-col lg:flex-row gap-8 lg:gap-12 transition transform hover:scale-[1.01] hover:shadow-[0_0_50px_rgba(0,191,255,0.8)] mt-12">
+
+        <!-- Columna de Visualización del Reactor (Izquierda / Arriba) -->
+        <div class="lg:w-1/2 flex flex-col items-center justify-center p-4 bg-panel-bg rounded-xl border border-fusion-blue/30 shadow-inner shadow-black/50">
+            <h3 class="text-xl font-bold mb-6 text-plasma-cyan uppercase tracking-widest">Núcleo de Contención</h3>
+
+            <!-- Contenedor de la Animación del Reactor -->
+            <div class="relative flex items-center justify-center w-full max-w-xs aspect-square">
+                <!-- Anillo de Contención 1 -->
+                <div class="containment-ring"></div>
+                <!-- Anillo de Contención 2 (Rotación inversa y más lento) -->
+                <div class="containment-ring" style="width: 180px; height: 180px; border-color: rgba(0, 255, 255, 0.1); border-bottom: 4px solid #00FFFF; animation: rotate 15s reverse linear infinite;"></div>
+                <!-- Núcleo de Plasma -->
+                <!-- Clase 'hidden-plasma' aplicada inicialmente -->
+                <div id="plasma-core" class="plasma-core hidden-plasma"></div>
+            </div>
+
+            <p class="mt-6 text-sm text-gray-400">
+                Estado: <span id="status-text" class="font-semibold text-red-400">Apagado - Esperando Combustible</span>
+                <!-- Elemento para mostrar el tiempo restante del pulso de fusión -->
+                <br>
+                Tiempo de Pulso: <span id="time-reading" class="font-mono text-blue-300">N/A</span>
+            </p>
+        </div>
+
+        <!-- Columna de Control de Procedimientos (Derecha / Abajo) -->
+        <div class="lg:w-1/2 flex flex-col gap-6">
+            <h2 class="text-3xl font-extrabold text-white border-b-2 border-plasma-cyan pb-2">Procedimientos de Arranque</h2>
+            
+            <!-- Mensaje de Guía -->
+            <div id="procedure-message" class="p-3 rounded-lg bg-panel-bg/70 border-l-4 border-yellow-400/80 shadow-md text-yellow-300 text-sm italic">
+                Paso 1: Inyecte el combustible de deuterio y tritio para comenzar.
+            </div>
+
+            <!-- Panel de Métricas Clave (Se mantienen) -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-3 rounded-lg bg-panel-bg/70 border-l-4 border-fusion-blue/80 shadow-md">
+                    <p class="text-sm text-gray-400">Temperatura del Plasma</p>
+                    <p class="text-2xl font-mono text-gray-500" id="temp-reading">0.00 Millones °C</p>
+                </div>
+                <div class="p-3 rounded-lg bg-panel-bg/70 border-l-4 border-fusion-blue/80 shadow-md">
+                    <p class="text-sm text-gray-400">Energía Neta</p>
+                    <p class="text-2xl font-mono text-gray-500" id="power-reading">Q = 0.00</p>
+                </div>
+                <div class="p-3 rounded-lg bg-panel-bg/70 border-l-4 border-fusion-blue/80 shadow-md">
+                    <p class="text-sm text-gray-400">Nivel de Combustible</p>
+                    <p class="text-2xl font-mono text-yellow-300" id="fuel-reading">0%</p>
+                </div>
+                <div class="p-3 rounded-lg bg-panel-bg/70 border-l-4 border-fusion-blue/80 shadow-md">
+                    <p class="text-sm text-gray-400">Potencia Magnética</p>
+                    <p class="text-2xl font-mono text-gray-300" id="magnet-reading">0%</p>
+                </div>
+            </div>
+
+            <!-- Controles de Procedimiento -->
+            <div class="flex flex-col gap-4 mt-2">
+                <!-- Botón 1: Inyectar Combustible -->
+                <button id="btn-fuel" class="w-full py-3 rounded-lg font-bold uppercase tracking-wider bg-red-600 text-white hover:bg-red-700 transition duration-300 ease-in-out" onclick="performAction('injectFuel')">
+                    1. Inyectar Combustible D-T
+                </button>
+                <!-- Botón 2: Activar Imanes -->
+                <button id="btn-magnets" class="w-full py-3 rounded-lg font-bold uppercase tracking-wider bg-gray-600 text-gray-400 cursor-not-allowed transition duration-300 ease-in-out" onclick="performAction('activateMagnets')" disabled>
+                    2. Activar Campo Magnético
+                </button>
+                <!-- Botón 3: Iniciar Ignición -->
+                <button id="btn-ignition" class="w-full py-3 rounded-lg font-bold uppercase tracking-wider bg-gray-600 text-gray-400 cursor-not-allowed transition duration-300 ease-in-out" onclick="performAction('startIgnition')" disabled>
+                    3. Iniciar Calentamiento (Ignición)
+                </button>
+                <!-- Botón 4: Recargar Combustible (Mantenimiento) -->
+                <button id="btn-refuel" class="w-full py-3 rounded-lg font-bold uppercase tracking-wider bg-gray-700 text-gray-500 cursor-not-allowed transition duration-300 ease-in-out" onclick="performAction('refuel')" disabled>
+                    4. Recargar Combustible (Mantenimiento)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ESTADO GLOBAL DEL REACTOR
+        let reactorState = {
+            step: 0, // 0: Apagado, 1: Combustible, 2: Imanes, 3: Fusión Estable
+            isStable: true,
+            timeRemaining: 225, // 3:45 min en segundos
+            fuelLevel: 0, // Nivel de combustible, de 0 a 100
+            intervalId: null, // Para el temporizador de pulso
+            dataIntervalId: null, // Para la actualización de métricas
+            isRefueling: false, // Bandera para saber si la recarga está en curso
+            refuelCooldown: 0, // Cooldown en segundos (10 segundos después de la recarga)
+        };
+
+        const STATUS_MESSAGES = {
+            0: { text: "Apagado - Esperando Combustible", color: "text-red-400", guide: "Paso 1: Inyecte el combustible de deuterio y tritio para comenzar." },
+            1: { text: "Preparado - Imanes Desactivados", color: "text-yellow-400", guide: "Paso 2: Active los potentes campos magnéticos de contención." },
+            2: { text: "Contención Estable - Listo para Ignición", color: "text-blue-400", guide: "Paso 3: Inicie el calentamiento del plasma para alcanzar la temperatura de fusión." },
+            3: { text: "¡FUSIÓN ESTABLE!", color: "text-green-400", guide: "Felicidades. El reactor está generando energía neta (Q > 1). Mantenga las métricas bajo control." }
+        };
+
+        // REFERENCIAS DE ELEMENTOS DEL DOM
+        const statusElement = document.getElementById('status-text');
+        const tempElement = document.getElementById('temp-reading');
+        const powerElement = document.getElementById('power-reading');
+        const fuelElement = document.getElementById('fuel-reading');
+        const magnetElement = document.getElementById('magnet-reading');
+        const messageElement = document.getElementById('procedure-message');
+        const plasmaCore = document.getElementById('plasma-core');
+        const timeElement = document.getElementById('time-reading');
+
+        const btnFuel = document.getElementById('btn-fuel');
+        const btnMagnets = document.getElementById('btn-magnets');
+        const btnIgnition = document.getElementById('btn-ignition');
+        const btnRefuel = document.getElementById('btn-refuel'); // Botón de recarga
+
+        // FUNCIÓN PRINCIPAL PARA MANEJAR LAS ACCIONES DEL USUARIO
+        function performAction(action) {
+            // No permitir acciones si hay una fluctuación, a menos que sea una recarga manual para estabilizar
+            if (!reactorState.isStable && action !== 'refuel') return; 
+
+            switch (action) {
+                case 'injectFuel':
+                    if (reactorState.step < 1) {
+                        reactorState.step = 1;
+                        reactorState.fuelLevel = 100; // Inyectar al 100%
+                        fuelElement.textContent = '100%';
+                        btnFuel.disabled = true;
+                        btnFuel.classList.remove('bg-red-600', 'hover:bg-red-700');
+                        btnFuel.classList.add('bg-green-600', 'text-white', 'cursor-not-allowed');
+                        
+                        btnMagnets.disabled = false;
+                        btnMagnets.classList.remove('bg-gray-600', 'text-gray-400', 'cursor-not-allowed');
+                        btnMagnets.classList.add('bg-fusion-blue', 'hover:bg-plasma-cyan');
+                    }
+                    break;
+
+                case 'activateMagnets':
+                    if (reactorState.step === 1) {
+                        reactorState.step = 2;
+                        magnetElement.textContent = '100%';
+                        btnMagnets.disabled = true;
+                        btnMagnets.classList.remove('bg-fusion-blue', 'hover:bg-plasma-cyan');
+                        btnMagnets.classList.add('bg-green-600', 'text-white', 'cursor-not-allowed');
+
+                        btnIgnition.disabled = false;
+                        btnIgnition.classList.remove('bg-gray-600', 'text-gray-400', 'cursor-not-allowed');
+                        btnIgnition.classList.add('bg-yellow-600', 'hover:bg-yellow-500');
+                    }
+                    break;
+                
+                case 'startIgnition':
+                    if (reactorState.step === 2) {
+                        reactorState.step = 3;
+                        plasmaCore.classList.remove('hidden-plasma'); // Mostrar plasma
+                        btnIgnition.disabled = true;
+                        btnIgnition.classList.remove('bg-yellow-600', 'hover:bg-yellow-500');
+                        btnIgnition.classList.add('bg-green-600', 'text-white', 'cursor-not-allowed');
+                        startTimer(); // Iniciar el temporizador de pulso
+                    }
+                    break;
+
+                case 'refuel': // Acción de recarga con proceso de 3 segundos + Cooldown
+                    // Solo recargar si está en fusión estable Y NO está recargando ya Y el nivel es < 100 Y NO está en cooldown
+                    if (reactorState.step === 3 && !reactorState.isRefueling && reactorState.fuelLevel < 100 && reactorState.refuelCooldown === 0) {
+                        reactorState.isRefueling = true;
+                        
+                        // Deshabilitar botón y mostrar estado de carga
+                        btnRefuel.disabled = true;
+                        btnRefuel.classList.remove('bg-yellow-600', 'text-white', 'hover:bg-yellow-500');
+                        btnRefuel.classList.add('bg-blue-600', 'text-white', 'cursor-wait', 'animate-pulse');
+                        btnRefuel.textContent = "4. Recargando... (3.0s)";
+
+                        messageElement.textContent = "Iniciando secuencia de recarga de combustible (3 segundos).";
+                        messageElement.classList.remove('border-red-600/80', 'text-red-400', 'border-green-600/80', 'text-green-400', 'border-yellow-400/80', 'text-yellow-300');
+                        messageElement.classList.add('border-blue-400/80', 'text-blue-300');
+
+                        let refuelCounter = 0;
+                        const refuelInterval = 300; // 10 ticks * 300ms = 3000ms (3 segundos)
+
+                        const refuelIntervalId = setInterval(() => {
+                            refuelCounter++;
+                            
+                            // *** CAMBIO: Aumentar el combustible 1% por tic (10 veces en total, max 10% añadido) ***
+                            reactorState.fuelLevel = Math.min(100, reactorState.fuelLevel + 1);
+                            
+                            fuelElement.textContent = `${reactorState.fuelLevel}%`;
+
+                            const secsRemaining = ((10 - refuelCounter) * 0.3).toFixed(1);
+                            btnRefuel.textContent = `4. Recargando... (${secsRemaining}s)`;
+
+                            if (refuelCounter >= 10 || reactorState.fuelLevel >= 100) {
+                                clearInterval(refuelIntervalId);
+                                reactorState.isRefueling = false;
+                                
+                                // *** APLICAR COOLDOWN (TIEMPO DE ESPERA) ***
+                                reactorState.refuelCooldown = 10; // 10 segundos de espera
+                                
+                                messageElement.textContent = "Combustible recargado. Activando enfriamiento de la línea de inyección (10s).";
+                                messageElement.classList.remove('border-blue-400/80', 'text-blue-300');
+                                messageElement.classList.add('border-green-600/80', 'text-green-400');
+                                
+                                // El botón se actualiza en handleCooldown()
+                                updateReadings();
+                                updateUI();
+                            }
+                        }, refuelInterval);
+                    }
+                    break;
+            }
+            updateUI(); // Actualizar el estado visual del reactor y la guía
+        }
+
+        // FUNCIÓN PARA MANEJAR EL COOLDOWN DE RECARGA
+        function handleCooldown() {
+            if (reactorState.refuelCooldown > 0) {
+                reactorState.refuelCooldown--;
+                
+                // Asegurarse de que el botón esté deshabilitado y muestre el tiempo
+                btnRefuel.disabled = true;
+                btnRefuel.classList.remove('bg-yellow-600', 'text-white', 'hover:bg-yellow-500', 'bg-blue-600', 'cursor-wait', 'animate-pulse');
+                btnRefuel.classList.add('bg-gray-700', 'text-gray-500', 'cursor-not-allowed');
+                
+                // Mostrar el tiempo de espera restante en el botón
+                btnRefuel.textContent = `4. Esperando Recarga (${reactorState.refuelCooldown}s)`;
+
+                if (reactorState.refuelCooldown === 0) {
+                    // Cooldown ha terminado. Forzar la re-evaluación para habilitar si el combustible lo permite
+                    updateReadings(); 
+                    updateUI();
+                }
+            }
+        }
+
+        // FUNCIÓN PARA SIMULAR LA ACTUALIZACIÓN DE DATOS
+        function updateReadings() {
+            let newTemp, newPower;
+
+            if (reactorState.step < 3) {
+                // Estado pre-ignición
+                newTemp = (Math.random() * 2 + 0).toFixed(2);
+                newPower = (Math.random() * 0.1).toFixed(2);
+                tempElement.classList.remove('text-yellow-300', 'text-red-400');
+                tempElement.classList.add('text-gray-500');
+                powerElement.classList.remove('text-green-400');
+                powerElement.classList.add('text-gray-500');
+                reactorState.isStable = true;
+            } else {
+                // Fusión Establecida (step 3)
+                
+                // 1. LÓGICA DE AGOTAMIENTO DE COMBUSTIBLE
+                if (reactorState.fuelLevel > 0) {
+                    // Agotar combustible (2% cada 1.5s)
+                    if (!reactorState.isRefueling) { // Solo agotar si NO se está recargando
+                        reactorState.fuelLevel = Math.max(0, reactorState.fuelLevel - 2); 
+                    }
+                    
+                    fuelElement.textContent = `${reactorState.fuelLevel}%`;
+                    fuelElement.classList.toggle('text-red-400', reactorState.fuelLevel < 10);
+                    fuelElement.classList.toggle('text-yellow-300', reactorState.fuelLevel >= 10);
+
+                    // 2. LÓGICA DE ACTIVACIÓN/DESACTIVACIÓN DEL BOTÓN DE RECARGA
+                    if (!reactorState.isRefueling && reactorState.refuelCooldown === 0) {
+                        if (reactorState.fuelLevel < 100) {
+                            // Habilitar botón si hay espacio y no hay cooldown
+                            btnRefuel.disabled = false;
+                            btnRefuel.classList.remove('bg-gray-700', 'text-gray-500', 'cursor-not-allowed');
+                            btnRefuel.classList.add('bg-yellow-600', 'text-white', 'hover:bg-yellow-500');
+                            btnRefuel.textContent = "4. Recargar Combustible (Mantenimiento)";
+                            
+                            // Si el combustible está bajo (alerta), mostrar el mensaje de alerta
+                            if (reactorState.fuelLevel < 20) {
+                                messageElement.textContent = "ALERTA DE COMBUSTIBLE BAJO: Recargue inmediatamente para evitar un apagado.";
+                                messageElement.classList.add('border-red-600/80', 'text-red-400'); 
+                            }
+
+                        } else {
+                            // Deshabilitar si el tanque está lleno
+                            btnRefuel.disabled = true;
+                            btnRefuel.classList.remove('bg-yellow-600', 'text-white', 'hover:bg-yellow-500');
+                            btnRefuel.classList.add('bg-gray-700', 'text-gray-500', 'cursor-not-allowed');
+                            btnRefuel.textContent = "4. Recargar Combustible (Lleno)";
+                        }
+                    }
+
+                } else if (reactorState.fuelLevel <= 0) {
+                    // 3. LÓGICA DE APAGADO POR COMBUSTIBLE
+                    clearInterval(reactorState.intervalId); // Detener temporizador
+                    reactorState.intervalId = null;
+                    clearInterval(reactorState.dataIntervalId); // Detener lecturas
+                    reactorState.dataIntervalId = null;
+                    reactorState.step = 0; // Volver al estado inicial
+                    
+                    plasmaCore.classList.add('hidden-plasma'); // Ocultar plasma
+                    timeElement.textContent = "00:00 min (PULSO CORTADO)";
+                    
+                    // Resetear botones y valores
+                    tempElement.textContent = "0.00 Millones °C";
+                    powerElement.textContent = "Q = 0.00";
+                    magnetElement.textContent = "0%";
+                    reactorState.refuelCooldown = 0; // Resetear cooldown
+                    
+                    btnFuel.disabled = false;
+                    btnFuel.classList.remove('bg-green-600', 'text-white', 'cursor-not-allowed');
+                    btnFuel.classList.add('bg-red-600', 'hover:bg-red-700');
+                    
+                    btnIgnition.disabled = true;
+                    btnIgnition.classList.remove('bg-green-600', 'text-white', 'cursor-not-allowed');
+                    btnIgnition.classList.add('bg-gray-600', 'text-gray-400', 'cursor-not-allowed');
+
+                    btnMagnets.disabled = true;
+                    btnMagnets.classList.remove('bg-green-600', 'text-white', 'cursor-not-allowed');
+                    btnMagnets.classList.add('bg-gray-600', 'text-gray-400', 'cursor-not-allowed');
+
+                    btnRefuel.disabled = true;
+                    btnRefuel.classList.remove('bg-yellow-600', 'text-white', 'hover:bg-yellow-500');
+                    btnRefuel.classList.add('bg-gray-700', 'text-gray-500', 'cursor-not-allowed');
+                    btnRefuel.textContent = "4. Recargar Combustible (Mantenimiento)"; // Asegurar texto base
+                    
+                    // Mensaje de apagado
+                    messageElement.textContent = "APAGADO CRÍTICO: El combustible se agotó. Inicie el proceso de nuevo.";
+                    messageElement.classList.add('border-red-600/80', 'text-red-400');
+
+                    // Reiniciar el loop de datos después de 5 segundos para que la UI se mantenga
+                    setTimeout(() => {
+                        reactorState.dataIntervalId = setInterval(updateReadings, 1500);
+                        updateUI();
+                    }, 5000);
+                    
+                    updateUI(); // Forzar actualización de estado a Apagado
+                    return; // Salir para evitar el resto de la lógica de fusión
+                }
+
+
+                // 4. LÓGICA DE LECTURAS (Solo si hay combustible y no se está recargando)
+                if (!reactorState.isRefueling) {
+                    // Simulación de fluctuación de temperatura (145M a 155M)
+                    newTemp = (Math.random() * 10 + 145).toFixed(2);
+                    // Simulación de fluctuación de factor Q (1.0 a 1.5)
+                    newPower = (Math.random() * 0.5 + 1.0).toFixed(2);
+                    
+                    // Chequeo de estabilidad (Alerta si Temp es muy alta)
+                    if (parseFloat(newTemp) > 154) {
+                        reactorState.isStable = false;
+                    } else {
+                        reactorState.isStable = true;
+                    }
+
+                    // Actualización de clases de texto para el factor Q
+                    powerElement.classList.toggle('text-yellow-300', newPower < 1.15);
+                    powerElement.classList.toggle('text-green-400', newPower >= 1.15);
+                    powerElement.classList.remove('text-gray-500');
+                    
+                    // Actualización de clases de texto para la temperatura
+                    tempElement.classList.toggle('text-yellow-300', parseFloat(newTemp) < 147);
+                    tempElement.classList.toggle('text-green-400', parseFloat(newTemp) >= 147 && parseFloat(newTemp) <= 154);
+                    tempElement.classList.toggle('text-red-400', parseFloat(newTemp) > 154);
+                    tempElement.classList.remove('text-gray-500');
+                } else {
+                    // Si se está recargando, las lecturas no cambian para simular un control estricto
+                    newTemp = tempElement.textContent.replace(' Millones °C', '');
+                    newPower = powerElement.textContent.replace('Q = ', '');
+                }
+            }
+
+            tempElement.textContent = `${newTemp} Millones °C`;
+            powerElement.textContent = `Q = ${newPower}`;
+            
+            // Si el reactor está inestable (alta temperatura), anular la alerta de combustible
+            if (!reactorState.isStable && reactorState.step === 3 && !reactorState.isRefueling) {
+                statusElement.textContent = "Alerta - Temperatura Crítica";
+                statusElement.classList.remove('text-green-400');
+                statusElement.classList.add('text-red-400', 'animate-pulse');
+                
+                // Si la alerta de combustible ya estaba activa, se mantiene el color rojo
+                if (reactorState.fuelLevel > 0) {
+                    messageElement.textContent = "Advertencia: La temperatura está fuera de rango. Requiere estabilización inmediata.";
+                }
+                messageElement.classList.remove('border-yellow-400/80', 'text-yellow-300');
+                messageElement.classList.add('border-red-600/80', 'text-red-400');
+            } else if (reactorState.step < 3 || reactorState.fuelLevel > 20 || reactorState.isRefueling) {
+                // Llamar a updateUI si no hay alerta de temp crítica o si estamos recargando
+                updateUI();
+            }
+        }
+
+        // FUNCIÓN PARA ACTUALIZAR ESTADO GENERAL Y MENSAJE DE GUÍA
+        function updateUI() {
+            // Si hay un cooldown activo, handleCooldown ya está actualizando el botón y el mensaje debe permanecer
+            if (reactorState.refuelCooldown > 0) return;
+
+            // Actualizar el estado general
+            const currentStatus = STATUS_MESSAGES[reactorState.step];
+            
+            // Actualizar el texto de estado
+            statusElement.textContent = currentStatus.text;
+            statusElement.className = statusElement.className.split(' ').filter(c => !c.startsWith('text-')).join(' ');
+            statusElement.classList.add(currentStatus.color);
+            statusElement.classList.remove('animate-pulse');
+            
+            // Actualizar el mensaje de guía, solo si NO se está recargando
+            if (!reactorState.isRefueling) {
+                 messageElement.textContent = currentStatus.guide;
+                 // Ajustar el borde del mensaje según el estado
+                messageElement.classList.remove('border-red-600/80', 'text-red-400', 'border-blue-400/80', 'text-blue-300');
+                if (reactorState.step < 3) {
+                    messageElement.classList.add('border-yellow-400/80', 'text-yellow-300');
+                } else {
+                     messageElement.classList.add('border-green-600/80', 'text-green-400');
+                }
+            }
+
+        }
+
+        // FUNCIÓN PARA EL TEMPORIZADOR DE PULSO
+        function startTimer() {
+            if (reactorState.intervalId) return;
+
+            reactorState.intervalId = setInterval(() => {
+                reactorState.timeRemaining--;
+
+                const minutes = Math.floor(reactorState.timeRemaining / 60);
+                const seconds = reactorState.timeRemaining % 60;
+                
+                timeElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} min`;
+
+                if (reactorState.timeRemaining <= 0) {
+                    clearInterval(reactorState.intervalId);
+                    reactorState.intervalId = null;
+                    timeElement.textContent = "FIN DE PULSO";
+                    // Esto no apaga el reactor, pero el pulso ha terminado. El combustible continúa agotándose.
+                }
+            }, 1000);
+        }
+
+
+        // INICIALIZACIÓN
+        window.onload = function() {
+            // Iniciar la actualización de datos (lecturas) cada 1.5 segundos
+            reactorState.dataIntervalId = setInterval(updateReadings, 1500); 
+            
+            // Intervalo para manejar el cooldown
+            setInterval(handleCooldown, 1000); 
+
+            // Inicializar la interfaz de usuario al estado 0
+            updateUI(); 
+            timeElement.textContent = "03:45 min"; // Tiempo inicial
+
+            // Asegurar que el núcleo de plasma esté oculto al inicio
+            plasmaCore.classList.add('hidden-plasma');
+        }
+    </script>
+</body>
+</html>

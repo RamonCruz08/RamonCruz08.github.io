@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Fusion Reactor Simulator v2.4</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Configuramos la fuente Inter y un fondo espacial profundo */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* Fondo tipo GitHub Dark */
+            color: #c9d1d9;
+        }
+
+        /* --- ANIMACIONES CSS AVANZADAS --- */
+
+        /* Pulsación del Núcleo */
+        @keyframes core-pulse {
+            0%, 100% { box-shadow: 0 0 10px #FFD700, 0 0 20px #FFA500, 0 0 40px #FF4500; }
+            50% { box-shadow: 0 0 20px #FFD700, 0 0 50px #FFA500, 0 0 80px #FF4500; }
+        }
+
+        /* Giro lento para dar vida al plasma */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Simulación de un filamento/protuberancia solar */
+        @keyframes flare-grow {
+            0% { opacity: 0; transform: scale(0.1) rotate(0deg); }
+            50% { opacity: 0.8; transform: scale(1.05) rotate(5deg); }
+            100% { opacity: 0; transform: scale(0.1) rotate(0deg); }
+        }
+
+        /* Contenedor del Sol */
+        .sun-container {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #FFA500 0%, #FF4500 70%);
+            border-radius: 50%;
+            position: relative;
+            animation: core-pulse 4s infinite ease-in-out;
+            overflow: hidden;
+            border: 5px solid rgba(255, 215, 0, 0.5);
+            transition: all 0.5s;
+        }
+
+        /* Overlay para simular turbulencia de plasma */
+        .plasma-overlay {
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            top: -25%;
+            left: -25%;
+            border-radius: 50%;
+            background: linear-gradient(45deg, rgba(255, 255, 0, 0.2), rgba(255, 69, 0, 0.2));
+            animation: spin 60s linear infinite;
+        }
+
+        /* El filamento dinámico que aparece durante los eventos */
+        .solar-flare-filament {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            background-color: rgba(255, 0, 0, 0.7);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: flare-grow 2s linear infinite;
+            z-index: 10;
+            display: none; /* Por defecto, oculto */
+        }
+        /* Media Query: Asegura que el Sol se encoja en pantallas pequeñas (teléfonos) */
+@media (max-width: 600px) {
+    .sun-container {
+        width: 200px; 
+        height: 200px;
+        /* Asegura que el plasma y el filamento también se ajusten proporcionalmente */
+        /* Si los elementos internos usan porcentajes, se ajustarán automáticamente. */
+    }
+}
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <!-- ENCABEZADO DE LA APLICACIÓN: Pequeño, llamativo y con botón de regreso -->
+    <header class="w-full bg-[#1e2a36] p-4 shadow-xl mb-8 rounded-xl flex items-center justify-between max-w-7xl">
+        <!-- Botón de Regreso (Ahora redirige a introduccion.html) -->
+        <button onclick="window.location.href = 'introduccion.html'" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold py-2 px-4 rounded-full transition duration-300 transform hover:scale-105 shadow-md shadow-indigo-500/50 flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Regresar
+        </button>
+        <!-- Título de la Página/Aplicación -->
+        <h2 class="text-xl md:text-3xl font-extrabold text-yellow-400 tracking-wider">
+            Reactor de Fusión Solar
+        </h2>
+        <!-- Placeholder para mantener el espacio y la alineación -->
+        <div class="w-24"></div>
+    </header>
+
+
+    <!-- LAYOUT PRINCIPAL RESPONSIVE (Visualización | Recursos | Controles) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
+
+        <!-- Columna 1 (Visualización del Sol) -->
+        <div class="flex flex-col items-center justify-center p-6 bg-[#161b22] rounded-xl shadow-2xl border border-[#21262d] lg:col-span-1 order-1">
+            <h3 class="text-xl font-bold mb-4 text-yellow-300 tracking-wider">Visualización del Núcleo</h3>
+
+            <div id="sun-visual" class="sun-container flex items-center justify-center relative">
+                <!-- Overlay de Plasma (para animación de turbulencia) -->
+                <div class="plasma-overlay"></div>
+                <!-- El Núcleo central -->
+                <div class="sun-core w-1/2 h-1/2 rounded-full flex items-center justify-center bg-solar-core z-20">
+                    <p class="text-xs font-mono text-gray-900 font-bold">FUSIÓN</p>
+                </div>
+                <!-- Filamento de Alerta (aparece con los eventos) -->
+                <div id="flare-filament" class="solar-flare-filament"></div>
+            </div>
+        </div>
+
+        <!-- Columna 2 (Panel de Recursos) -->
+        <div class="p-6 bg-[#161b22] rounded-xl shadow-2xl border border-[#21262d] order-2">
+            <h2 class="text-2xl font-bold mb-4 text-white border-b border-gray-700 pb-2">Recursos & Estado</h2>
+
+            <!-- Indicador de Tiempo/Puntuación -->
+            <div class="mb-4 p-3 bg-gray-800 rounded-lg flex justify-between items-center">
+                <p class="text-sm text-gray-400">Tiempo de Supervivencia:</p>
+                <p class="text-xl font-mono text-green-400" id="time-elapsed">0 s</p>
+            </div>
+
+            <!-- Métrica 1: ESTABILIDAD (La más importante) -->
+            <div class="mb-4">
+                <p class="text-sm text-gray-400 mb-1 flex justify-between">
+                    Estabilidad del Núcleo:
+                    <span id="stability-value" class="font-bold text-lg">75%</span>
+                </p>
+                <div class="w-full h-4 rounded-full bg-gray-800 overflow-hidden">
+                    <div id="stability-bar" class="h-full transition-all duration-300" style="width: 75%; background-color: #38a169;"></div>
+                </div>
+            </div>
+
+            <!-- Métrica 2: TEMPERATURA (Control de Calor) -->
+            <div class="mb-4">
+                <p class="text-sm text-gray-400 mb-1 flex justify-between">
+                    Temperatura (Heat):
+                    <span id="heat-value" class="font-bold text-lg text-red-400">18.0 MK</span>
+                </p>
+                <div class="w-full h-4 rounded-full bg-gray-800 overflow-hidden">
+                    <div id="heat-bar" class="h-full transition-all duration-300 bg-red-600" style="width: 30%;"></div>
+                </div>
+            </div>
+
+            <!-- Métrica 3: COMBUSTIBLE (Hidrógeno) -->
+            <div class="mb-4">
+                <p class="text-sm text-gray-400 mb-1 flex justify-between">
+                    Combustible (H²):
+                    <span id="fuel-value" class="font-bold text-lg text-blue-400">100%</span>
+                </p>
+                <div class="w-full h-4 rounded-full bg-gray-800 overflow-hidden">
+                    <div id="fuel-bar" class="h-full transition-all duration-300 bg-blue-500" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <!-- Mensajes de Eventos -->
+            <div id="event-message" class="mt-4 p-3 rounded-lg border border-yellow-500/50 bg-yellow-900/20 text-yellow-300 text-center font-semibold transition-all duration-500 opacity-0 h-10 flex items-center justify-center">
+                <!-- Mensaje de evento aleatorio activo -->
+            </div>
+        </div>
+
+        <!-- Columna 3: Controles de Intervención (Ordenado) -->
+        <div class="p-6 bg-[#161b22] rounded-xl shadow-2xl border border-[#21262d] order-3">
+            <h2 class="text-2xl font-bold mb-4 text-white border-b border-gray-700 pb-2">Controles de Intervención</h2>
+
+            <p class="text-sm text-gray-400 mb-4">Utiliza las acciones de forma estratégica para mantener la Estabilidad y el Combustible.</p>
+
+            <div class="flex flex-col gap-4">
+                <!-- Control 1: Booster de Estabilidad -->
+                <button id="stability-booster-btn" class="w-full py-3 rounded-lg font-bold uppercase tracking-wider
+                        bg-blue-600 text-white shadow-lg shadow-blue-500/20
+                        hover:bg-blue-500 transition duration-300 ease-in-out disabled:opacity-50">
+                    1. Booster de Estabilidad (+Estabilidad, -Combustible, COOLDOWN: 3s)
+                </button>
+
+                <!-- Control 2: Purga de Radiación (Enfriamiento) -->
+                <button id="cool-zone-btn" class="w-full py-3 rounded-lg font-bold uppercase tracking-wider
+                        bg-red-600 text-white shadow-lg shadow-red-500/20
+                        hover:bg-red-500 transition duration-300 ease-in-out disabled:opacity-50">
+                    2. Purga de Radiación (-Heat, +Estabilidad, COOLDOWN: 3s)
+                </button>
+
+                <!-- Control 3: Suministro de Combustible (Para llenar el tanque) - COOLDOWN DE 3s -->
+                <button id="supply-fuel-btn" class="w-full py-3 rounded-lg font-bold uppercase tracking-wider
+                        bg-green-600 text-white shadow-lg shadow-green-500/20
+                        hover:bg-green-500 transition duration-300 ease-in-out disabled:opacity-50">
+                    3. Suministrar Combustible (Llenar H², COOLDOWN: 3s)
+                </button>
+                
+                <!-- Control 4: Contención de Emergencia (Para Eventos) -->
+                <button id="contain-flare-btn" class="w-full py-3 rounded-lg font-bold uppercase tracking-wider
+                        bg-yellow-600 text-gray-900 shadow-lg shadow-yellow-500/20
+                        hover:bg-yellow-500 transition duration-300 ease-in-out disabled:opacity-50">
+                    4. Contención de Emergencia (Evento Activo)
+                </button>
+
+
+                <p id="cooldown-status" class="text-center text-sm mt-2 text-gray-500 h-6">
+                    <!-- Estado de enfriamiento / Feedback de acción -->
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE GAME OVER/VICTORIA -->
+    <div id="game-modal" class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-[#161b22] p-8 rounded-xl border-4 border-yellow-500 shadow-2xl w-full max-w-md text-center">
+            <h3 id="modal-title" class="text-4xl font-extrabold mb-4 text-yellow-400">Simulación Terminada</h3>
+            <p id="modal-message" class="text-lg text-gray-300 mb-6"></p>
+            <p class="text-sm text-gray-500">Tiempo total de supervivencia:</p>
+            <p id="modal-score" class="text-3xl font-mono font-bold text-green-400 mb-6">0 s</p>
+            <button onclick="window.location.reload()" class="w-full py-3 bg-green-700 text-white rounded-lg font-bold hover:bg-green-600 transition">
+                Reiniciar Simulación
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // NOTE: The game state is stored only in memory (the 'state' object). 
+        // Therefore, refreshing or exiting the page will automatically reset the simulation 
+        // as the JavaScript is re-executed and the initial state is loaded.
+
+        // --- ESTADO GLOBAL DEL SIMULADOR ---
+        let state = {
+            stability: 75,      // 0 (Failure) to 100 (Optimal)
+            fuel: 100,          // 0 (Empty) to 100 (Full)
+            heat: 30,           // 0 (Cold) to 100 (Meltdown)
+            timeElapsed: 0,
+            isRunning: true,
+            event: null,        // 'FLARE' | 'LOW_H' | null
+            cooldowns: {
+                stabilityBooster: 0, 
+                coolZone: 0,        
+                supplyFuel: 0,      
+                containFlare: 0,    
+            }
+        };
+
+        // --- REFERENCIAS UI ---
+        const ui = {
+            stabilityBar: document.getElementById('stability-bar'),
+            stabilityValue: document.getElementById('stability-value'),
+            heatBar: document.getElementById('heat-bar'),
+            heatValue: document.getElementById('heat-value'),
+            fuelBar: document.getElementById('fuel-bar'),
+            fuelValue: document.getElementById('fuel-value'),
+            timeElapsed: document.getElementById('time-elapsed'),
+            sunVisual: document.getElementById('sun-visual'),
+            flareFilament: document.getElementById('flare-filament'),
+            eventMessage: document.getElementById('event-message'),
+            cooldownStatus: document.getElementById('cooldown-status'),
+            
+            stabilityBoosterBtn: document.getElementById('stability-booster-btn'),
+            coolZoneBtn: document.getElementById('cool-zone-btn'),
+            containFlareBtn: document.getElementById('contain-flare-btn'),
+            supplyFuelBtn: document.getElementById('supply-fuel-btn'), 
+
+            gameModal: document.getElementById('game-modal'),
+            modalTitle: document.getElementById('modal-title'),
+            modalMessage: document.getElementById('modal-message'),
+            modalScore: document.getElementById('modal-score')
+        };
+
+        // --- UTILIDADES ---
+
+        /** Limita un valor entre un mínimo y un máximo. */
+        const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+
+        /** Muestra un mensaje de feedback temporal en el UI. */
+        function updateUIFeedback(message, type = 'normal') {
+            ui.cooldownStatus.textContent = message;
+            ui.cooldownStatus.classList.remove('text-red-500', 'text-green-500', 'text-gray-500');
+            
+            if (type === 'error') {
+                ui.cooldownStatus.classList.add('text-red-500');
+            } else if (type === 'success') {
+                ui.cooldownStatus.classList.add('text-green-500');
+            } else {
+                ui.cooldownStatus.classList.add('text-gray-500');
+            }
+
+            setTimeout(() => { ui.cooldownStatus.textContent = ''; ui.cooldownStatus.classList.remove('text-red-500', 'text-green-500'); }, 3000);
+        }
+
+        /** Actualiza el estado del juego y los valores de la UI. */
+        function updateUI() {
+            // Estabilidad
+            state.stability = clamp(state.stability, 0, 100);
+            ui.stabilityBar.style.width = `${state.stability}%`;
+            ui.stabilityValue.textContent = `${state.stability.toFixed(0)}%`;
+            ui.stabilityBar.style.backgroundColor = state.stability > 75 ? '#38a169' : state.stability > 30 ? '#ed8936' : '#e53e3e';
+            
+            // Heat
+            state.heat = clamp(state.heat, 0, 100);
+            ui.heatBar.style.width = `${state.heat}%`;
+            ui.heatValue.textContent = `${(15.0 + state.heat / 10).toFixed(1)} MK`; // Mapea 0-100 a 15-25 MK
+            ui.heatBar.style.backgroundColor = state.heat < 40 ? '#4299e1' : state.heat < 75 ? '#ed8936' : '#e53e3e';
+            ui.sunVisual.style.borderColor = state.heat > 75 ? '#e53e3e' : '#FFD700';
+
+            // Combustible
+            state.fuel = clamp(state.fuel, 0, 100);
+            ui.fuelBar.style.width = `${state.fuel}%`;
+            ui.fuelValue.textContent = `${state.fuel.toFixed(0)}%`;
+            ui.fuelBar.style.backgroundColor = state.fuel > 30 ? '#4299e1' : '#e53e3e';
+
+            // Time/Score
+            ui.timeElapsed.textContent = `${state.timeElapsed} s`;
+
+            // Actualización de Cooldowns y estado de botones
+            const updateButtonState = (button, cooldown, baseText, activeText) => {
+                const text = cooldown > 0 ? `${activeText} (${cooldown.toFixed(0)}s)` : baseText;
+                button.textContent = text;
+                button.disabled = cooldown > 0;
+                if (cooldown > 0) {
+                    button.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    button.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            };
+            
+            updateButtonState(ui.stabilityBoosterBtn, state.cooldowns.stabilityBooster, 
+                '1. Booster de Estabilidad (+Estabilidad, -Combustible, COOLDOWN: 3s)', '1. Booster de Estabilidad');
+            
+            updateButtonState(ui.coolZoneBtn, state.cooldowns.coolZone, 
+                '2. Purga de Radiación (-Heat, +Estabilidad, COOLDOWN: 3s)', '2. Purga de Radiación');
+            
+            updateButtonState(ui.supplyFuelBtn, state.cooldowns.supplyFuel, 
+                '3. Suministrar Combustible (Llenar H², COOLDOWN: 3s)', '3. Suministrar Combustible');
+
+            // Contención de Emergencia solo se activa con evento
+            ui.containFlareBtn.disabled = !state.event;
+            if (state.event) {
+                ui.containFlareBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                ui.containFlareBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        /** Finaliza el evento activo y aplica consecuencias. */
+        function endEvent(result) {
+            if (!state.event) return;
+
+            if (result === 'success') {
+                ui.eventMessage.textContent = `✅ Evento (${state.event}) Contenido con Éxito.`;
+            } else {
+                ui.eventMessage.textContent = `❌ Evento (${state.event}) Fallido. PENALIZACIÓN SEVERA.`;
+                state.stability = clamp(state.stability - 20, 0, 100); // Gran penalización por no contener
+            }
+
+            // Restablecer estado visual y de juego
+            ui.flareFilament.style.display = 'none';
+            state.event = null;
+            state.cooldowns.containFlare = 0;
+            
+            // Mostrar mensaje de éxito/fallo temporalmente
+            ui.eventMessage.classList.remove('opacity-0');
+            setTimeout(() => { ui.eventMessage.textContent = ''; ui.eventMessage.classList.add('opacity-0'); }, 3000);
+        }
+
+        /** Maneja la generación y visualización de Eventos Aleatorios. */
+        function handleRandomEvent() {
+            if (state.event === null && Math.random() < 0.15) { // 15% de chance de evento cada 5 segundos
+                const events = ['FLARE', 'LOW_H'];
+                state.event = events[Math.floor(Math.random() * events.length)];
+                
+                if (state.event === 'FLARE') {
+                    ui.eventMessage.textContent = '🚨 LLAMARADA SOLAR detectada! El núcleo se desestabiliza.';
+                    ui.flareFilament.style.display = 'block';
+                } else if (state.event === 'LOW_H') {
+                    ui.eventMessage.textContent = '⚠️ Fuga de Combustible! Pérdida de H² y Estabilidad.';
+                }
+                ui.eventMessage.classList.remove('opacity-0');
+                state.cooldowns.containFlare = 10; // El tiempo de reacción del jugador es de 10 segundos
+                updateUIFeedback('¡ALERTA DE EVENTO! Se necesita Contención. Tiempo restante: 10s', 'error');
+            }
+
+            if (state.event) {
+                // Penalizaciones por evento activo
+                state.cooldowns.containFlare--;
+
+                if (state.event === 'FLARE') {
+                    state.stability -= 5;
+                    state.heat += 3;
+                } else if (state.event === 'LOW_H') {
+                    state.stability -= 3;
+                    state.fuel -= 3;
+                }
+                
+                // Actualizar contador de tiempo de reacción
+                if (state.cooldowns.containFlare > 0) {
+                    ui.cooldownStatus.textContent = `¡ALERTA DE EVENTO! Reacción en ${state.cooldowns.containFlare}s`;
+                    ui.cooldownStatus.classList.add('text-red-500');
+                }
+
+                // Si el jugador no reacciona a tiempo
+                if (state.cooldowns.containFlare <= 0) {
+                    endEvent('failure');
+                }
+            }
+        }
+
+        // --- ACCIONES DEL JUGADOR ---
+
+        /** Control 1: Booster de Estabilidad (+Estabilidad, -Combustible, +Heat) */
+        ui.stabilityBoosterBtn.addEventListener('click', () => {
+            if (!state.isRunning || ui.stabilityBoosterBtn.disabled) return;
+            if (state.fuel < 5) {
+                updateUIFeedback('Combustible insuficiente para el Booster.', 'error');
+                return;
+            }
+            
+            state.stability = clamp(state.stability + 15, 0, 100);
+            state.fuel -= 5; 
+            state.heat = clamp(state.heat + 5, 0, 100); 
+            
+            state.cooldowns.stabilityBooster = 3; 
+
+            updateUIFeedback('Booster de Estabilidad activado. +15 Estabilidad.', 'success');
+            updateUI();
+        });
+
+        /** Control 2: Purga de Radiación (-Heat, +Estabilidad, COOLDOWN) */
+        ui.coolZoneBtn.addEventListener('click', () => {
+            if (!state.isRunning || ui.coolZoneBtn.disabled) return; 
+            
+            state.heat = clamp(state.heat - 25, 0, 100);
+            state.stability = clamp(state.stability + 5, 0, 100);
+            state.cooldowns.coolZone = 3; 
+
+            updateUIFeedback('Purga de calor iniciada. -25 Heat.', 'success');
+            updateUI();
+        });
+
+        /** Control 3: Suministrar Combustible (Llenar H², COOLDOWN de 3s) */
+        ui.supplyFuelBtn.addEventListener('click', () => {
+            if (!state.isRunning || ui.supplyFuelBtn.disabled) return; 
+
+            state.fuel = clamp(state.fuel + 40, 0, 100); // RELLENA el tanque
+            state.heat = clamp(state.heat + 10, 0, 100); // Costo en calor por la bomba
+            
+            state.cooldowns.supplyFuel = 3; 
+
+            updateUIFeedback('Suministro de H² completado. +40 Combustible. ¡Generó calor!', 'success');
+            updateUI();
+        });
+
+
+        /** Control 4: Contención de Emergencia (Solo Eventos) */
+        ui.containFlareBtn.addEventListener('click', () => {
+            if (!state.isRunning || !state.event || ui.containFlareBtn.disabled) return; 
+
+            if (state.fuel < 20) {
+                updateUIFeedback('Fallo de contención: Combustible insuficiente (se necesita 20 H²).', 'error');
+                state.stability = clamp(state.stability - 10, 0, 100);
+                endEvent('failure');
+            } else {
+                state.fuel = clamp(state.fuel - 20, 0, 100); 
+                state.heat = clamp(state.heat + 10, 0, 100); 
+                endEvent('success');
+                updateUIFeedback('Contención de Emergencia Exitosa. -20 Combustible.', 'success');
+            }
+            updateUI();
+        });
+        
+        // --- BUCLE PRINCIPAL DEL JUEGO (GAME LOOP) ---
+
+        let gameTickInterval;
+        let eventLoopInterval;
+
+        /** Lógica pasiva por tick (cada 1 segundo). */
+        function gameTick() {
+            if (!state.isRunning) return;
+
+            // 1. Degradación Pasiva y Flujo de Calor
+            state.timeElapsed++;
+            state.stability -= 1.5; 
+            state.fuel -= 1.0;      
+            // Pequeña variación de calor natural (un poco más de incremento)
+            state.heat = clamp(state.heat + (Math.random() * 2 - 1.2), 0, 100); 
+
+            // 2. Penalizaciones basadas en métricas
+            if (state.heat > 50) {
+                // Penalización de estabilidad si hace demasiado calor
+                state.stability -= (state.heat - 50) / 10; 
+            }
+            if (state.fuel < 20) {
+                // Gran penalización de estabilidad si el combustible es bajo
+                state.stability -= 5; 
+            }
+            if (state.stability < 30) {
+                // Aumento de calor por inestabilidad
+                state.heat += 5; 
+            }
+
+            // 3. Aplicar Cooldowns
+            if (state.cooldowns.coolZone > 0) state.cooldowns.coolZone--;
+            if (state.cooldowns.stabilityBooster > 0) state.cooldowns.stabilityBooster--;
+            if (state.cooldowns.supplyFuel > 0) state.cooldowns.supplyFuel--; 
+
+            // 4. Comprobar Final del Juego (Objetivo de 120s)
+            if (state.stability <= 0 || state.fuel <= 0 || state.heat >= 100) {
+                endGame('failure');
+            } else if (state.timeElapsed >= 120) { 
+                endGame('success');
+            }
+
+            // 5. Actualizar UI
+            updateUI();
+        }
+
+        /** Finaliza el juego y muestra el modal. */
+        function endGame(result) {
+            state.isRunning = false;
+            clearInterval(gameTickInterval);
+            clearInterval(eventLoopInterval);
+
+            if (result === 'failure') {
+                ui.gameModal.querySelector('div').classList.remove('border-yellow-500', 'border-green-600');
+                ui.gameModal.querySelector('div').classList.add('border-red-600');
+                ui.modalTitle.textContent = '¡Fallo Crítico del Reactor!';
+                ui.modalTitle.classList.remove('text-yellow-400', 'text-green-400');
+                ui.modalTitle.classList.add('text-red-400');
+                ui.modalScore.classList.remove('text-green-400');
+                ui.modalScore.classList.add('text-red-400');
+
+                let reason = '';
+                if (state.stability <= 0) reason = 'La Estabilidad del Núcleo cayó a cero.';
+                else if (state.fuel <= 0) reason = 'El Combustible de Hidrógeno se agotó.';
+                else if (state.heat >= 100) reason = 'La Temperatura alcanzó el punto de Fusión.';
+                
+                ui.modalMessage.textContent = `La simulación ha fallado: ${reason}`;
+            } else if (result === 'success') {
+                ui.gameModal.querySelector('div').classList.remove('border-yellow-500', 'border-red-600');
+                ui.gameModal.querySelector('div').classList.add('border-green-600');
+                ui.modalTitle.textContent = '¡ÉXITO EN LA SIMULACIÓN!';
+                ui.modalTitle.classList.remove('text-yellow-400', 'text-red-400');
+                ui.modalTitle.classList.add('text-green-400');
+                ui.modalScore.classList.remove('text-red-400');
+                ui.modalScore.classList.add('text-green-400');
+                ui.modalMessage.textContent = 'Has mantenido la fusión solar estable durante 120 segundos.';
+            }
+
+            ui.modalScore.textContent = `${state.timeElapsed} segundos`;
+            ui.gameModal.style.display = 'flex';
+        }
+
+
+        // --- INICIALIZACIÓN ---
+        function initGame() {
+            // Iniciar bucles de juego
+            gameTickInterval = setInterval(gameTick, 1000); // Bucle principal por segundo
+            eventLoopInterval = setInterval(eventLoop, 5000); // Bucle de eventos cada 5 segundos
+            
+            // Renderizado inicial
+            updateUI(); 
+            updateUIFeedback('Simulación iniciada. Objetivo: 120s de estabilidad.', 'normal');
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>

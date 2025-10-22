@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introducción a la Energía de Fusión</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'fusion-dark': '#010409', // Fondo aún más oscuro
+                        'plasma-neon': '#00F0FF', // Cyan brillante
+                        'sun-core': '#ff9900',   // Naranja brillante para el Sol
+                        'slate-850': '#152033',
+                        'green-accel': '#10b981', // Verde esmeralda
+                        'danger-red': '#ef4444', // Rojo
+                        'team-blue': '#3b82f6', // Nuevo color: Azul metálico
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Animación para mover la rejilla de fondo */
+        @keyframes background-move {
+            from { background-position: 0 0; }
+            to { background-position: 1000px 1000px; } /* Movimiento lento diagonal */
+        }
+
+        /* Animación de Resplandor Neón para el Título (Intensificado) */
+        @keyframes neon-glow {
+            from { text-shadow: 0 0 8px #00F0FF, 0 0 15px #00F0FF; }
+            to { text-shadow: 0 0 12px #00F0FF, 0 0 25px #00F0FF, 0 0 40px #00F0FF80; }
+        }
+
+        body {
+            background-color: #010409; /* fusion-dark */
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            font-family: 'Inter', sans-serif;
+            position: relative; 
+            overflow-x: hidden; /* Previene scroll horizontal por los efectos */
+        }
+
+        /* ESTRELLA 1: Fondo de Rejilla Animada (Simulando una matriz cósmica) */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Creación de patrón de rejilla sutil */
+            background-image: 
+                repeating-linear-gradient(0deg, rgba(0,240,255,0.05) 0, rgba(0,240,255,0.05) 1px, transparent 1px, transparent 80px),
+                repeating-linear-gradient(90deg, rgba(0,240,255,0.05) 0, rgba(0,240,255,0.05) 1px, transparent 1px, transparent 80px);
+            opacity: 0.2; 
+            z-index: -1;
+            animation: background-move 120s linear infinite; /* Movimiento lento */
+        }
+
+        /* Aplicación de la animación al título */
+        .animated-title {
+            animation: neon-glow 1.5s ease-in-out infinite alternate;
+        }
+
+        /* Estilo base para las tarjetas de contenido */
+        .concept-card {
+            background-color: #1a2333; 
+            border: 1px solid #334155;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Sombra inicial */
+        }
+
+        /* ESTRELLA 2: Efecto de levantamiento y rotación al pasar el ratón (más dinámico) */
+        .concept-card:hover {
+            transform: translateY(-10px) scale(1.03) rotateZ(0.5deg); /* Más movimiento y ligera rotación */
+            z-index: 10;
+        }
+
+        /* ESTRELLA 3: Efectos de Resplandor Específicos (Glow mucho más intensos) */
+        .card-danger:hover {
+            box-shadow: 0 15px 40px rgba(239, 68, 68, 0.8), 0 0 30px rgba(239, 68, 68, 0.6); /* Red Glow */
+            border-color: #ef4444;
+        }
+        .card-plasma:hover {
+            box-shadow: 0 15px 40px rgba(0, 240, 255, 0.8), 0 0 30px rgba(0, 240, 255, 0.6); /* Cyan Glow */
+            border-color: #00F0FF;
+        }
+        .card-sun:hover {
+            box-shadow: 0 15px 40px rgba(255, 153, 0, 0.8), 0 0 30px rgba(255, 153, 0, 0.6); /* Orange Glow */
+            border-color: #ff9900;
+        }
+        .card-green:hover {
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.8), 0 0 30px rgba(16, 185, 129, 0.6); /* Green Glow */
+            border-color: #10b981;
+        }
+        /* NUEVO: Team Blue Glow */
+        .card-team:hover {
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.6); 
+            border-color: #3b82f6;
+        }
+
+
+        /* ESTRELLA 4: Borde de neón intermitente en el contenedor principal */
+        .main-container-border {
+            border: 3px solid;
+            border-image: linear-gradient(45deg, #00F0FF, #10b981, #00F0FF) 1;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+            animation: border-pulse 4s infinite alternate;
+        }
+
+        @keyframes border-pulse {
+            from { box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); }
+            to { box-shadow: 0 0 25px rgba(0, 240, 255, 0.8); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="w-full max-w-5xl bg-[#0f172a] p-8 sm:p-12 rounded-2xl shadow-2xl backdrop-blur-sm main-container-border">
+
+        <header class="text-center mb-12">
+            <h1 class="text-6xl font-black text-plasma-neon tracking-wider animated-title">
+                Explorando la Fusión Cósmica
+            </h1>
+            <p class="text-2xl text-slate-300 mt-3 font-light">
+                El poder del Sol, en tus manos.
+            </p>
+        </header>
+
+        <div class="text-slate-200 space-y-4 mb-12 bg-slate-800/50 p-6 rounded-xl border border-sun-core/30">
+            <p class="text-lg">
+           Embárcate en un viaje de proporciones estelares donde desvelaremos el secreto de la energía más potente del universo: la **fusión nuclear**. Este fenómeno, la chimenea ardiente que enciende nuestro Sol y las estrellas, es la promesa de un futuro energético ilimitado y limpio en la Tierra.
+            </p>
+            <p class="text-sm text-slate-400">
+                ¡Selecciona un módulo para iniciar tu viaje de exploración!
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+
+            <a href="fusion_reactor_game.html" class="concept-card card-danger p-6 rounded-xl border-danger-red/50">
+                <div class="flex flex-col h-full">
+                    <div class="flex items-center space-x-4 mb-3">
+                        <span class="text-5xl text-danger-red flex-shrink-0">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c-2 3-4 4.5-4 4.5c.342 1.042 1.33 2.052 2.515 2.515C7.4 17.5 9.043 19.143 10.5 19.5c.463 1.185 1.473 2.173 2.515 2.515.228-.795.7-1.554 1.393-2.181a10.05 10.05 0 011.832-1.428l.206-.118z"></path></svg>
+                        </span>
+                        <h3 class="text-3xl font-extrabold text-danger-red tracking-tight">
+                            Reto de Conocimiento
+                        </h3>
+                    </div>
+                    <p class="text-slate-400 text-base flex-grow mb-6">
+                        Tu misión: **Sacar el mejor puntuaje entre todos las personas** ser la mejor en este mini juego muy divertido.
+                    </p>
+                    <div class="card-button w-full text-center py-3 bg-danger-red/30 text-white font-bold rounded-lg hover:bg-danger-red/50 shadow-md hover:shadow-lg transition duration-300">
+                        INICIAR RETO
+                    </div>
+                </div>
+            </a>
+
+            <a href="solar_system.html" class="concept-card card-plasma p-6 rounded-xl border-plasma-neon/50">
+                <div class="flex flex-col h-full">
+                    <div class="flex items-center space-x-4 mb-3">
+                        <span class="text-5xl text-plasma-neon flex-shrink-0">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h4l2-4h4l2 4h4m-9 0v-2m-4 2a4 4 0 110 8h9a4 4 0 00-4-4V10z"></path></svg>
+                        </span>
+                        <h3 class="text-3xl font-extrabold text-plasma-neon tracking-tight">
+                            Sistema Solar 3D
+                        </h3>
+                    </div>
+                    <p class="text-slate-400 text-base flex-grow mb-6">
+                        Explora una visualización interactiva de nuestro sistema planetario. Observa las órbitas y conoce la composición de los planetas que giran alrededor de nuestro motor de fusión natural: **el Sol**.
+                    </p>
+                    <div class="card-button w-full text-center py-3 bg-plasma-neon/30 text-white font-bold rounded-lg hover:bg-plasma-neon/50 shadow-md hover:shadow-lg transition duration-300">
+                        EXPLORAR EL COSMOS
+                    </div>
+                </div>
+            </a>
+
+            <a href="Simulación_del_Funcionamiento_del_Sol.html" class="concept-card card-sun p-6 rounded-xl border-sun-core/50">
+                <div class="flex flex-col h-full">
+                    <div class="flex items-center space-x-4 mb-3">
+                        <span class="text-5xl text-sun-core flex-shrink-0">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m18 0h-2M6.343 17.657l-.707.707M19.071 4.929l-.707.707M4.929 4.929l.707.707M17.657 17.657l.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        </span>
+                        <h3 class="text-3xl font-extrabold text-sun-core tracking-tight">
+                            Simulación del Sol
+                        </h3>
+                    </div>
+                    <p class="text-slate-400 text-base flex-grow mb-6">
+                        Observa una simulación conceptual de cómo la **gravedad** y las fuerzas de compresión generan el plasma y fuerzan los núcleos de hidrógeno a fusionarse en la estrella. Entiende el motor de la vida.
+                    </p>
+                    <div class="card-button w-full text-center py-3 bg-sun-core/30 text-white font-bold rounded-lg hover:bg-sun-core/50 shadow-md hover:shadow-lg transition duration-300">
+                        VER SIMULACIÓN
+                    </div>
+                </div>
+            </a>
+
+            <a href="reactor_de_fusion.html" class="concept-card card-green p-6 rounded-xl border-green-accel/50">
+                <div class="flex flex-col h-full">
+                    <div class="flex items-center space-x-4 mb-3">
+                        <span class="text-5xl text-green-accel flex-shrink-0">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 12H3m18 0h-2M6.343 17.657l-.707.707M19.071 4.929l-.707.707M4.929 4.929l.707.707M17.657 17.657l.707.707M18 12a6 6 0 11-12 0 6 6 0 0112 0z"></path></svg>
+                        </span>
+                        <h3 class="text-3xl font-extrabold text-green-accel tracking-tight">
+                            El Reactor Tokamak
+                        </h3>
+                    </div>
+                    <p class="text-slate-400 text-base flex-grow mb-6">
+                        Conoce los componentes clave de un **Tokamak** toroidal, cómo se confina el plasma mediante campos magnéticos, y cuáles son los próximos pasos hacia la energía de fusión comercial en la Tierra.
+                    </p>
+                    <div class="card-button w-full text-center py-3 bg-green-accel/30 text-white font-bold rounded-lg hover:bg-green-accel/50 shadow-md hover:shadow-lg transition duration-300">
+                        VER INFORMACIÓN
+                    </div>
+                </div>
+            </a>
+            
+        </div>
+        
+        <div class="flex justify-center">
+            <a href="nosotros_somos.html" class="concept-card card-team w-full md:w-1/2 p-6 rounded-xl border-team-blue/50">
+                <div class="flex flex-col h-full items-center">
+                    <div class="flex items-center space-x-4 mb-3">
+                        <span class="text-5xl text-team-blue flex-shrink-0">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h-1.39C14.73 18.25 12.85 17 10 17s-4.73 1.25-5.61 3H3c.53-2.61 2.37-4.95 5.25-6.55M10 13a4 4 0 100-8 4 4 0 000 8zM17 13a3 3 0 110-6 3 3 0 010 6z"></path></svg>
+                        </span>
+                        <h3 class="text-3xl font-extrabold text-team-blue tracking-tight">
+                            Nosotros Somos
+                        </h3>
+                    </div>
+                    <p class="text-slate-400 text-center text-base flex-grow mb-6">
+                        Conoce a las mentes detrás de esta exploración: nuestra misión, nuestros valores y el equipo que hace posible este viaje hacia la energía del futuro.
+                    </p>
+                    <div class="card-button w-full text-center py-3 bg-team-blue/30 text-white font-bold rounded-lg hover:bg-team-blue/50 shadow-md hover:shadow-lg transition duration-300">
+                        CONOCER AL EQUIPO
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+    </div>
+
+</body>
+</html>
